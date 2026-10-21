@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.ttf binary
+*.deb binary
+*.ipk binary
+src/E2PVR/OFL-Vazirmatn.txt whitespace=-blank-at-eol

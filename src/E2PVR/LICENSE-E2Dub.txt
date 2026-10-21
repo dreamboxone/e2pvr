@@ -1,0 +1,75 @@
+E2Dub — Live AI audio dubbing and subtitle translation for Enigma2 receivers
+
+Copyright (c) 2026 Routekernel. All rights reserved.
+Contact: https://t.me/Routekernel1
+
+PROPRIETARY SOFTWARE LICENSE
+
+This software and its source code, build tooling, packaging scripts, fonts
+selection, user interface, and documentation (together, "the Software") are the
+exclusive property of the copyright holder. The Software is licensed, not sold.
+
+1. GRANT OF USE
+
+   You are granted a personal, non-exclusive, non-transferable, revocable
+   licence to install and run one unmodified copy of the Software on Enigma2
+   receivers that you own or administer, for your own private, non-commercial
+   use.
+
+2. RESTRICTIONS
+
+   You may NOT, in whole or in part:
+
+   a) redistribute, publish, upload, mirror, resell, rent, sublicense, or
+      otherwise make the Software available to any third party, including on
+      forums, file hosts, image feeds, plugin repositories, or messaging
+      channels, without prior written permission from the copyright holder;
+
+   b) modify, adapt, translate, or create derivative works of the Software;
+
+   c) reverse engineer, decompile, disassemble, deobfuscate, or otherwise
+      attempt to derive the source code of the Software, except strictly to
+      the extent this restriction is prohibited by applicable law;
+
+   d) remove, obscure, or alter any copyright notice, licence text, publisher
+      name, integrity manifest, or digital signature contained in the Software
+      or its packages;
+
+   e) present the Software, or any part of it, as your own work, or publish it
+      under a different name, brand, or authorship.
+
+3. INTEGRITY AND AUTHENTICITY
+
+   Official packages are signed with the publisher's Ed25519 key and verify
+   their own integrity at runtime. A package that fails this verification is
+   not an official release and is not covered by this licence or by any
+   support commitment.
+
+4. THIRD-PARTY COMPONENTS
+
+   The Software invokes external programs present on the receiver (such as
+   FFmpeg and GStreamer) and communicates with third-party network services.
+   Those components remain under their own licences and terms. Bundled fonts
+   are distributed under their own licences; see FONT-NOTICE.txt.
+
+5. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+6. LIMITATION OF LIABILITY
+
+   IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE,
+   ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+   OTHER DEALINGS IN THE SOFTWARE.
+
+7. TERMINATION
+
+   This licence terminates automatically and immediately if you breach any of
+   its terms. On termination you must stop using the Software and delete all
+   copies in your possession.
+
+For redistribution, commercial use, or any permission not granted above,
+contact the copyright holder at https://t.me/Routekernel1

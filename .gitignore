@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+dist/
+build/
+.pytest_cache/
+apikey.txt
+key.txt
+*.log
+.env*
+*.ts
+*.wav
+*.srt
