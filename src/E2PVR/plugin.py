@@ -180,7 +180,10 @@ class SettingsScreen(Screen):
         configfile.save()
         if monitor:
             monitor.update()
-        self.rebuild()
+        if settings.enabled.value:
+            self.save()
+        else:
+            self.rebuild()
 
     def refresh_status(self):
         if self.testing or self.test_result is not None:

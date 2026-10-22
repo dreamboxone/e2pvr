@@ -26,7 +26,8 @@ After installation, package archives matching
 Use the generated package filename when uploading to `/tmp`. Other filenames
 and files outside `/tmp` are not removed.
 
-Open E2PVR from the plugin menu. Red starts or stops translation immediately;
+Open E2PVR from the plugin menu. Red starts or stops translation immediately, as in E2Dub. Starting saves
+preferences and returns to playback; stopping keeps the menu open;
 green saves display preferences and closes the menu; Exit cancels unsaved display
 changes. Yellow tests the actual subtitle connection with a 60-second display
 deadline. Play a local recording with the image's player. Reopen E2PVR and press red
@@ -105,9 +106,9 @@ or universal OE-Alliance binary.
 
 `tools/build_native.py` accepts an explicit Cython executable, cross compiler,
 strip tool, receiver-matched include directory and a new output directory.
-Generated C files remain outside the source tree. Only `__init__.py`, the
-platform profile and the worker entry script remain as Python in a native
-payload; application modules are stripped shared libraries. Native builds make
+Generated C files remain outside the source tree. Only `__init__.py`, the platform profile, a small plugin discovery entry and
+the worker entry script remain as Python in a native payload; application
+modules are stripped shared libraries. Native builds make
 source inspection less convenient, but do not prevent copying or reverse
 engineering. Publicly distributed source remains available regardless of the
 installed package format.
