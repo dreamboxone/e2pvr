@@ -1,2 +1,4 @@
 # -*- coding: utf-8 -*-
-VERSION = "0.2.0"
+# Copyright (c) 2026 Routekernel. All rights reserved.
+# Licensed under the project LICENSE; third-party notices remain applicable.
+VERSION = "0.2.2"

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Routekernel. All rights reserved.
+# Licensed under the project LICENSE; third-party notices remain applicable.
 """Build deterministic DEB and IPK archives without platform-specific tools."""
 import gzip
 import hashlib
@@ -6,7 +8,7 @@ from pathlib import Path
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 NAME = "enigma2-plugin-extensions-e2pvr"
 
 

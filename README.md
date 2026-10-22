@@ -1,6 +1,6 @@
 # E2PVR
 
-PVR subtitle translation for Enigma2, version 0.2.1.
+PVR subtitle translation for Enigma2, version 0.2.2.
 
 The receiver streams the selected audio track of a local recording to Gemini
 Live and displays translated subtitles. Source language is detected automatically.

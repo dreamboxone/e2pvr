@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2026 Routekernel. All rights reserved.
+# Licensed under the project LICENSE; third-party notices remain applicable.
 import os
 import sys
 import textwrap
@@ -19,6 +21,7 @@ from .core import SubtitleTrack, overlay_geometry, logger, steady_time, split_cu
 from .service import KEY_FILE, DEFAULT_MODEL, MODELS, probe, read_key, ServiceError
 from .runtime import Runtime
 from .live import probe_live
+from . import VERSION
 
 
 def native_text(text):
@@ -143,10 +146,11 @@ class SettingsScreen(Screen):
         self.skin = '''<screen name="E2PVRSettings" position="center,center" size="%d,%d" title="E2PVR">
             %s
             <widget name="status" position="20,%d" size="%d,70" font="Regular;22" />
+            <widget name="publisher" position="20,%d" size="%d,30" font="Regular;20" halign="center" />
             <widget name="save" position="20,%d" size="%d,35" font="Regular;22" foregroundColor="#00ff00" />
             <widget name="cancel" position="%d,%d" size="%d,35" font="Regular;22" foregroundColor="#ff5555" />
             <widget name="test" position="%d,%d" size="%d,35" font="Regular;22" foregroundColor="#ffff00" />
-        </screen>''' % (width, height, "".join(columns), height - 125, width - 40,
+        </screen>''' % (width, height, "".join(columns), height - 140, width - 40, height - 78, width - 40,
             height - 45, width // 3 - 20, width // 3, height - 45, width // 3 - 20,
             2 * width // 3, height - 45, width // 3 - 20)
         Screen.__init__(self, session)
@@ -156,6 +160,7 @@ class SettingsScreen(Screen):
         self.onLayoutFinish.append(self.refresh_rows)
         self["save"], self["cancel"], self["test"] = Label(""), Label(""), Label("")
         self["status"] = Label("")
+        self["publisher"] = Label("Copyright 2026 Routekernel | t.me/routekernel1")
         self.testing = False
         self.test_result = None
         self.test_attempt = 0
@@ -198,7 +203,7 @@ class SettingsScreen(Screen):
         self["status"].setText(tr(status))
 
     def rebuild(self):
-        self.setTitle("E2PVR - " + tr("Settings"))
+        self.setTitle("E2PVR " + VERSION + " - " + tr("Settings"))
         for setting, choices in [(settings.color, [("ffffff", "White"), ("ffff00", "Yellow"), ("00ff00", "Green"), ("00ffff", "Cyan")]),
                                  (settings.size, [("small", "Small"), ("medium", "Medium"), ("large", "Large")])]:
             setting.setChoices([(key, tr(label)) for key, label in choices], default=setting.value)

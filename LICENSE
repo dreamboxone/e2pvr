@@ -40,17 +40,16 @@ exclusive property of the copyright holder. The Software is licensed, not sold.
 
 3. INTEGRITY AND AUTHENTICITY
 
-   Official packages are signed with the publisher's Ed25519 key and verify
-   their own integrity at runtime. A package that fails this verification is
-   not an official release and is not covered by this licence or by any
-   support commitment.
+   Obtain official packages only from the copyright holder's distribution
+   channels. Where checksum files are supplied, use them to check downloaded
+   files for accidental corruption.
 
 4. THIRD-PARTY COMPONENTS
 
    The Software invokes external programs present on the receiver (such as
    FFmpeg and GStreamer) and communicates with third-party network services.
    Those components remain under their own licences and terms. Bundled fonts
-   are distributed under their own licences; see FONT-NOTICE.txt.
+   are distributed under their own licences; see OFL-Vazirmatn.txt.
 
 5. NO WARRANTY
 
