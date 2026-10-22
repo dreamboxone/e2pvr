@@ -9,7 +9,7 @@ import tarfile
 import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.3"
+VERSION = "0.2.4"
 NAME = "enigma2-plugin-extensions-e2pvr"
 
 
@@ -67,12 +67,15 @@ def main(argv=None):
     for name in ("LICENSE", "README.md"):
         path = ROOT / name
         if path.is_file():
-            files.append(("./usr/share/doc/" + NAME + "/" + name, path.read_bytes(), 0o644))
+            files.append(("./usr/share/doc/" + NAME + "/" + name, path.read_bytes().replace(b"\r\n", b"\n"), 0o644))
     for extension in (("deb", "ipk") if arguments.format == "both" else (arguments.format,)):
         plugin_root = "./usr/lib/enigma2/python/Plugins/Extensions/E2PVR/"
         platform = "dreamos" if extension == "deb" else "oealliance-universal"
         payload = [item for item in files if item[0] != plugin_root + "platform_profile.py"]
-        payload.append((plugin_root + "platform_profile.py", ('PLATFORM_PROFILE = "%s"\n' % platform).encode("ascii"), 0o644))
+        payload.append((plugin_root + "platform_profile.py", (
+            '# Copyright (c) 2026 Routekernel. All rights reserved.\n'
+            '# Licensed under the project LICENSE.\n'
+            'PLATFORM_PROFILE = "%s"\n' % platform).encode("ascii"), 0o644))
         data = archive(payload)
         dependency = {"2.7": ", python-core (>= 2.7), python-core (<< 2.8)",
                       "3": ", python3-core"}.get(arguments.python_abi, "")

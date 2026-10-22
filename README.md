@@ -1,6 +1,6 @@
 # E2PVR
 
-PVR subtitle translation for Enigma2, version 0.2.3.
+PVR subtitle translation for Enigma2, version 0.2.4.
 
 The receiver streams the selected audio track of a local recording to Gemini
 Live and displays translated subtitles. Source language is detected automatically.
@@ -44,13 +44,17 @@ box transparency are configurable. Fonts are discovered in `/usr/share/fonts`.
 Vazirmatn SemiBold is also supplied under the included SIL Open Font License.
 Each subtitle line has a separate non-wrapping label to preserve RTL line order.
 
-When translation is enabled and a recording starts, supported seekable playback
-is held at its initial position for up to four seconds. Translation runs
-in a separate worker through one persistent Live connection. The audio cursor
-stays at most four seconds ahead of the current playback position. Playback
-resumes when a complete subtitle becomes available or the preparation budget
-expires. Network or service latency can still cause late or missing subtitles;
-four seconds is a preparation limit, not a service response guarantee.
+At translation startup the recording plays a preview of four seconds by default.
+The worker translates while that preview plays. The player then seeks back once
+to the preview's initial position and continues with the prepared subtitles.
+The menu's Startup delay setting selects 0-4 seconds. This preview is performed
+only at initial startup, not after each seek. The plugin's own rewind preserves
+the translation session and prepared cues. Playback must support seeking.
+Network/service latency can still exceed this preparation window.
+
+Translation runs in a separate worker through a persistent connection. Its audio
+cursor remains at most four seconds ahead of the position currently being read.
+During the initial preview this prepares audio beyond the preview's return point.
 
 Only committed phrases are displayed. Two-second text stability, sentence and
 turn boundaries, a six-cue ordered pending window, two-to-six-second reading
@@ -117,3 +121,37 @@ Package the staged `E2PVR` directory with `tools/build_packages.py --native-root
 <staged-directory> --architecture arm64 --python-abi 2.7 --format deb`.
 Keep the universal packages for other receivers until their native builds have
 been tested on matching hardware.
+
+Translation starts only after pressing red during local playback. A saved enabled
+flag does not resume translation after an interface restart. The red label follows
+the active recording worker; failed or stopped workers show Start, which retries
+from the current playback position. UTF-8 recording names are passed explicitly
+to the decoder on Python 2.7.
+
+Local media is not filtered by filename extension. Names in any UTF-8 script,
+spaces and punctuation are passed without shell parsing. Actual playback and
+audio decoding still depend on the receiver player and FFmpeg codecs.
+
+## Exit and restart
+
+No translation worker, decoder or network connection is started on image or
+interface startup. Start must be pressed explicitly. Graceful interface shutdown
+kills the worker process group without waiting for network requests. On Linux,
+parent-death signals also kill a worker if the interface crashes and a decoder if
+its worker disappears. No startup download, worker recovery or blocking network
+operation is required for boot.
+
+## Subtitle shaping
+
+As in E2Dub, when `/usr/bin/pango-view` is available, subtitle glyphs are shaped
+by Pango and displayed as a transparent bitmap. The selected font's actual family
+is read from its font metadata. This preserves Arabic mark placement, Persian
+joining and digit coverage. Rendering runs asynchronously; changed or hidden
+captions cancel obsolete work. A missing renderer or failed bitmap falls back to
+the native two-label overlay. Renderer children also receive parent-death signals
+and are terminated without blocking the interface on close.
+
+If Start is pressed from the plugin browser while no local recording is playing,
+the recording selector opens. Choosing a recording starts the native MoviePlayer
+with translation enabled. Cancelling the selector returns to settings. E2PVR is
+also available in the Extensions menu for access during playback.

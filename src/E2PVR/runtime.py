@@ -9,8 +9,10 @@ import subprocess
 import sys
 import tempfile
 import threading
+from functools import partial
 from .storage import atomic_json, read_json
 from . import PACKAGE_DIR
+from .process_guard import guarded_session
 
 
 def worker_python():
@@ -32,7 +34,7 @@ class Runtime(object):
         root = PACKAGE_DIR
         with open(os.path.join(self.directory, "worker.log"), "wb") as errors:
             self.process = subprocess.Popen([worker_python(), os.path.join(root, "worker_main.py"), self.directory],
-                stdout=errors, stderr=errors, preexec_fn=os.setsid, close_fds=True)
+                stdout=errors, stderr=errors, preexec_fn=partial(guarded_session, os.getpid()), close_fds=True)
 
     def state(self):
         state = read_json(os.path.join(self.directory, "state.json"))
@@ -40,10 +42,11 @@ class Runtime(object):
             state["error"] = "Processing worker stopped"
         return state
 
-    def command(self, source, target, model, generation, position, audio_stream="0:a:0"):
+    def command(self, source, target, model, generation, position, audio_stream="0:a:0", preview_origin=None, preview_delay_ms=0):
         if self.process.poll() is None:
             atomic_json(os.path.join(self.directory, "control.json"), dict(source=source, target=target,
-                model=model, generation=generation, position_ms=position, audio_stream=audio_stream))
+                model=model, generation=generation, position_ms=position, audio_stream=audio_stream,
+                preview_origin_ms=preview_origin, preview_delay_ms=preview_delay_ms))
 
     def stop(self):
         process, directory = self.process, self.directory

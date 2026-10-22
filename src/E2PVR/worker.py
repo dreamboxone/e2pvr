@@ -8,15 +8,18 @@ import subprocess
 import sys
 import threading
 import time
+from functools import partial
 if not __package__:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from E2PVR.core import logger, steady_time
     from E2PVR.storage import read_json, atomic_json
     from E2PVR.live import LiveSession, connection_error
+    from E2PVR.process_guard import guard_parent
 else:
     from .core import logger, steady_time
     from .storage import read_json, atomic_json
     from .live import LiveSession, connection_error
+    from .process_guard import guard_parent
 
 
 def merge_text(current, update):
@@ -27,6 +30,13 @@ def merge_text(current, update):
     if current.endswith(update):
         return current
     return current + update
+
+
+def process_arguments(values):
+    # Python 2 execv cannot safely encode non-ASCII recording paths itself.
+    if sys.version_info[0] == 2:
+        return [value.encode("utf-8") if isinstance(value, type(u"")) else value for value in values]
+    return values
 
 
 def stop_process(process):
@@ -67,7 +77,11 @@ def run(directory):
             duration = max(1000, min(6000, len(cue_text) * 1000 // 17))
             beginning = flow["start"]
             end = max(beginning + duration, flow["pending_end"])
-            available_position = max(0, read_json(control_path).get("position_ms", 0))
+            presentation = read_json(control_path)
+            available_position = max(0, presentation.get("position_ms", 0))
+            if presentation.get("preview_origin_ms") is not None:
+                available_position = max(presentation["preview_origin_ms"],
+                    available_position - presentation.get("preview_delay_ms", 0))
             flow["sequence"] += 1
             state["cues"].append(dict(start=available_position, end=available_position + duration,
                 source_start=beginning, source_end=end, text=cue_text,
@@ -180,10 +194,11 @@ def run(directory):
             if source and connection and not eof:
                 if decoder is None:
                     with open(os.devnull, "wb") as null:
-                        decoder = subprocess.Popen(["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
+                        decoder = subprocess.Popen(process_arguments(["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
                             "-ss", "%.3f" % (flow["cursor"] / 1000.0), "-i", source,
                             "-map", command.get("audio_stream", "0:a:0"), "-vn", "-sn", "-dn", "-ac", "1", "-ar", "16000",
-                            "-f", "s16le", "pipe:1"], stdout=subprocess.PIPE, stderr=null, close_fds=True)
+                            "-f", "s16le", "pipe:1"]), stdout=subprocess.PIPE, stderr=null, close_fds=True,
+                            preexec_fn=partial(guard_parent, os.getpid()))
                 position = max(0, command.get("position_ms", 0))
                 if flow["cursor"] < position + 4000:
                     wanted = min(3200, max(0, position + 4000 - flow["cursor"]) * 32)

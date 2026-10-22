@@ -7,9 +7,18 @@ import time
 import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "src"))
 from E2PVR.worker import stop_process, merge_text
+from E2PVR.worker import process_arguments
+from unittest.mock import patch
 
 
 class WorkerTests(unittest.TestCase):
+    def test_python2_decoder_arguments_encode_non_ascii_recording_names(self):
+        name = "/media/hdd/фильм فارسی.ts"
+        with patch("E2PVR.worker.sys.version_info", (2, 7)):
+            values = process_arguments(["ffmpeg", "-i", name])
+        self.assertTrue(all(isinstance(value, bytes) for value in values))
+        self.assertEqual(values[-1].decode("utf-8"), name)
+
     def test_blocked_audio_producer_is_reaped_without_waiting_for_pipe_flush(self):
         code = "import os,signal; signal.signal(signal.SIGTERM,signal.SIG_IGN); os.write(1,b'ready\\n'); exec('while True: os.write(1,b\"x\"*65536)')"
         process = subprocess.Popen([sys.executable,"-u","-c",code],stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)

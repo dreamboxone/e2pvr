@@ -22,6 +22,13 @@ from .service import KEY_FILE, DEFAULT_MODEL, MODELS, probe, read_key, ServiceEr
 from .runtime import Runtime
 from .live import probe_live
 from . import VERSION, PACKAGE_DIR
+from .raster import Rasterizer
+try:
+    from Components.Pixmap import Pixmap
+    from Tools.LoadPixmap import LoadPixmap
+    from enigma import ePoint, eSize
+except ImportError:
+    Pixmap = LoadPixmap = None
 
 
 def native_text(text):
@@ -71,6 +78,8 @@ if not hasattr(settings, "model"):
     settings.model = ConfigSelection(default=DEFAULT_MODEL, choices=[(model, model) for model in MODELS])
 if not hasattr(settings, "sync"):
     settings.sync = ConfigSelection(default="0.00", choices=[("%.2f" % (step / 4.0), "%.2f" % (step / 4.0)) for step in range(-16, 15)])
+if not hasattr(settings, "startup_delay"):
+    settings.startup_delay = ConfigSelection(default="4", choices=[(str(seconds), str(seconds)) for seconds in range(5)])
 
 
 TRANSLATIONS = {
@@ -80,6 +89,7 @@ TRANSLATIONS = {
     "Vertical position (%)": ("موقعیت عمودی (درصد)", "الموضع الرأسي (%)"),
     "Box transparency (%)": ("شفافیت کادر (درصد)", "شفافية الإطار (%)"),
     "Subtitle timing (seconds)": ("تنظیم زمان زیرنویس (ثانیه)", "توقيت الترجمة (ثانية)"),
+    "Startup delay (seconds)": ("تأخیر آغاز پخش (ثانیه)", "تأخير بدء التشغيل (ثانية)"),
     "Service model": ("مدل سرویس", "نموذج الخدمة"), "Save": ("ذخیره", "حفظ"),
     "Cancel": ("انصراف", "إلغاء"), "Check connection": ("آزمایش اتصال", "اختبار الاتصال"),
     "White": ("سفید", "أبيض"), "Yellow": ("زرد", "أصفر"), "Green": ("سبز", "أخضر"),
@@ -96,6 +106,7 @@ TRANSLATIONS = {
     "Stop translation": ("توقف ترجمه", "إيقاف الترجمة"),
     "Translation stopped": ("ترجمه متوقف است", "الترجمة متوقفة"),
     "Ready - play a recorded movie": ("آماده؛ یک فیلم ضبط‌شده پخش کنید", "جاهز؛ شغّل فيلماً مسجلاً"),
+    "Press Start to select a recorded movie": ("برای انتخاب فیلم ضبط‌شده، شروع را بزنید", "اضغط بدء لاختيار فيلم مسجل"),
     "Connecting to subtitle service...": ("در حال اتصال به سرویس زیرنویس...", "جار الاتصال بخدمة الترجمة..."),
     "Translating recording": ("در حال ترجمه فیلم", "جار ترجمة التسجيل"),
     "Connection test timed out; check receiver network": ("مهلت آزمایش تمام شد؛ شبکه ریسیور را بررسی کنید", "انتهت مهلة الاختبار؛ تحقق من شبكة الجهاز"),
@@ -175,7 +186,25 @@ class SettingsScreen(Screen):
         self.timer.start(200)
 
     def toggle_translation(self):
-        settings.enabled.value = not settings.enabled.value
+        if monitor is None:
+            self["status"].setText(tr("Processing worker stopped"))
+            return
+        starting = not monitor.is_active()
+        self.test_result = None
+        if starting:
+            try:
+                read_key()
+            except ServiceError as error:
+                self["status"].setText(tr(str(error)))
+                return
+            ref = self.session.nav.getCurrentlyPlayingServiceReference()
+            if not ref or not ref.getPath() or not os.path.isfile(ref.getPath()):
+                from Screens.MovieSelection import MovieSelection
+                self.session.openWithCallback(self.recording_selected, MovieSelection)
+                return
+            settings.enabled.value = False
+            monitor.update()
+        settings.enabled.value = starting
         settings.enabled.save()
         configfile.save()
         if monitor:
@@ -185,14 +214,29 @@ class SettingsScreen(Screen):
         else:
             self.rebuild()
 
+    def recording_selected(self, reference):
+        if reference is None:
+            return
+        if not reference.getPath() or not os.path.isfile(reference.getPath()):
+            self["status"].setText(tr("Ready - play a recorded movie"))
+            return
+        settings.enabled.value = True
+        settings.enabled.save()
+        for unused, setting in self.rows:
+            setting.save()
+        configfile.save()
+        self.close(reference)
+
     def refresh_status(self):
+        self["cancel"].setText(tr("Stop translation" if monitor and monitor.is_active() else "Start translation"))
         if self.testing or self.test_result is not None:
             return
         try:
             read_key()
             state = monitor.runtime.state() if monitor and monitor.runtime else {}
             if not settings.enabled.value:
-                status = "Translation stopped"
+                ref = self.session.nav.getCurrentlyPlayingServiceReference()
+                status = "Translation stopped" if ref and ref.getPath() else "Press Start to select a recorded movie"
             elif state.get("error"):
                 status = state["error"]
             elif not monitor or not monitor.path:
@@ -210,11 +254,12 @@ class SettingsScreen(Screen):
         for setting, choices in [(settings.color, [("ffffff", "White"), ("ffff00", "Yellow"), ("00ff00", "Green"), ("00ffff", "Cyan")]),
                                  (settings.size, [("small", "Small"), ("medium", "Medium"), ("large", "Large")])]:
             setting.setChoices([(key, tr(label)) for key, label in choices], default=setting.value)
-        self.rows = [("Enabled", settings.enabled), ("Interface language", settings.language),
+        self.rows = [("Interface language", settings.language),
             ("Subtitle language", settings.target), ("Color", settings.color), ("Font", settings.font),
             ("Font size", settings.size), ("Vertical position (%)", settings.position),
-            ("Box transparency (%)", settings.transparency), ("Subtitle timing (seconds)", settings.sync)]
-        for name, label in [("save", "Save"), ("cancel", "Stop translation" if settings.enabled.value else "Start translation"), ("test", "Check connection")]:
+            ("Box transparency (%)", settings.transparency), ("Subtitle timing (seconds)", settings.sync),
+            ("Startup delay (seconds)", settings.startup_delay)]
+        for name, label in [("save", "Save"), ("cancel", "Stop translation" if monitor and monitor.is_active() else "Start translation"), ("test", "Check connection")]:
             self[name].setText(tr(label))
         try:
             read_key()
@@ -285,9 +330,12 @@ class SettingsScreen(Screen):
         if self.testing and steady_time() - self.test_started >= 60:
             self.test_attempt += 1
             self.test_result = "Connection test timed out; check receiver network"
-        if self.test_result is not None:
+        if self.test_result is not None and self.testing:
             self["status"].setText(tr(self.test_result))
             self.testing = False
+            self.test_finished = steady_time()
+        elif self.test_result is not None and steady_time() - self.test_finished >= 5:
+            self.test_result = None
         self.refresh_status()
 
     def save(self):
@@ -309,17 +357,71 @@ class Overlay(Screen):
         self.line_chars = max(24, min(96, int(46 * 64.0 / points * width / 1920.0)))
         alpha = int(255 * settings.transparency.value / 100.0)
         self.skin = '''<screen name="E2PVROverlay" position="%d,%d" size="%d,%d" zPosition="10" flags="wfNoBorder" backgroundColor="#%02x000000">
+            <widget name="bitmap" position="0,0" size="%d,%d" transparent="1" alphatest="blend" />
             <widget name="text" position="10,8" size="%d,%d" font="%s;%d" halign="center" valign="center" transparent="1" noWrap="1" foregroundColor="#%s" />
             <widget name="line2" position="10,%d" size="%d,%d" font="%s;%d" halign="center" valign="center" transparent="1" noWrap="1" foregroundColor="#%s" />
-        </screen>''' % (x, y, box_width, box_height, alpha, box_width - 20, box_height // 2 - 8,
+        </screen>''' % (x, y, box_width, box_height, alpha, box_width, box_height, box_width - 20, box_height // 2 - 8,
                         escape(settings.font.value), points, settings.color.value,
                         box_height // 2, box_width - 20, box_height // 2 - 8,
                         escape(settings.font.value), points, settings.color.value)
         Screen.__init__(self, session)
         self["text"] = Label("")
         self["line2"] = Label("")
+        self["bitmap"] = Pixmap() if Pixmap else Label("")
+        self["bitmap"].hide()
+        self.last_text = None
+        self.raster = None
+        self.raster_visible = False
+        self.box_width, self.box_height = box_width, box_height
+        if Pixmap and LoadPixmap and os.access("/usr/bin/pango-view", os.X_OK):
+            try:
+                font_path = None
+                if settings.font.value == "E2PVR_Vazirmatn":
+                    font_path = os.path.join(PACKAGE_DIR, "Vazirmatn-SemiBold.ttf")
+                elif settings.font.value.startswith("E2PVR_"):
+                    for name in os.listdir("/usr/share/fonts"):
+                        if os.path.splitext(name)[0] == settings.font.value[6:]:
+                            font_path = os.path.join("/usr/share/fonts", name)
+                            break
+                self.raster = Rasterizer(font_path, points, box_width - 4, settings.color.value)
+                self.onClose.append(self.raster.close)
+            except Exception:
+                logger().exception("Subtitle shaping unavailable")
 
     def display(self, text):
+        if text != self.last_text:
+            self.last_text = text
+            self.raster_visible = False
+            self["bitmap"].hide()
+            self["text"].show()
+            self["line2"].show()
+            if self.raster:
+                try:
+                    self.raster.request(text)
+                except Exception:
+                    logger().exception("Subtitle shaping failed")
+        job = self.raster.poll() if self.raster else None
+        if job:
+            try:
+                import struct
+                path = job["stem"] + ".png"
+                with open(path, "rb") as stream:
+                    header = stream.read(24)
+                width, height = struct.unpack(">II", header[16:24])
+                pixmap = LoadPixmap(native_text(path), desktop=getDesktop(0), cached=False)
+                if pixmap is None:
+                    raise ValueError("Subtitle image unavailable")
+                self["bitmap"].setPixmap(pixmap)
+                self["bitmap"].instance.resize(eSize(width, height))
+                self["bitmap"].instance.move(ePoint(max(0, (self.box_width - width) // 2), max(0, (self.box_height - height) // 2)))
+                self["bitmap"].show()
+                self.raster_visible = True
+                self["text"].hide()
+                self["line2"].hide()
+            except Exception:
+                logger().exception("Subtitle image display failed")
+            finally:
+                self.raster.discard(job)
         if text:
             lines = text.split("\n")
             self["text"].setText(native_text(lines[0]))
@@ -332,6 +434,13 @@ class Overlay(Screen):
 
 
 class PlaybackMonitor(object):
+    def is_active(self):
+        if not settings.enabled.value or not self.path:
+            return False
+        if self.track:
+            return True
+        return bool(self.runtime and self.runtime.process.poll() is None and not self.runtime.state().get("error"))
+
     def __init__(self, session):
         self.session = session
         self.timer = eTimer()
@@ -346,6 +455,8 @@ class PlaybackMonitor(object):
         self.previous_position = None
         self.previous_time = None
         self.preparing = None
+        self.preview_position = None
+        self.rewind_guard_until = 0
         self.paused = None
         self.last_error = None
         self.scheduler = CueScheduler()
@@ -370,6 +481,8 @@ class PlaybackMonitor(object):
         self.previous_position = self.previous_time = None
         self.scheduler.reset()
         self.audio_stream = None
+        self.preview_position = None
+        self.rewind_guard_until = 0
 
     def poll(self):
         try:
@@ -399,7 +512,7 @@ class PlaybackMonitor(object):
             self.runtime = Runtime(settings.target.value)
         ref = self.session.nav.getCurrentlyPlayingServiceReference()
         path = ref.getPath() if ref else ""
-        if not path or not os.path.isfile(path) or os.path.splitext(path)[1].lower() not in (".ts", ".mkv", ".mp4", ".avi", ".mov", ".mpg", ".mpeg", ".m2ts"):
+        if not path or not os.path.isfile(path):
             if self.path:
                 self.generation += 1
                 self.runtime.command("", settings.target.value, settings.model.value, self.generation, 0)
@@ -427,13 +540,13 @@ class PlaybackMonitor(object):
             if self.track:
                 formatted = split_cues([dict(start=start, end=end, text=text) for start, end, text in self.track.cues], self.overlay.line_chars)
                 self.track = SubtitleTrack([(cue["start"], cue["end"], cue["text"]) for cue in formatted])
-            if changed_path and not self.track and stamp is not None:
+            if changed_path and not self.track and stamp is not None and int(settings.startup_delay.value) > 0:
                 self.preparing = steady_time()
         service = self.session.nav.getCurrentService()
         seek = service.seek() if service else None
         position_result = seek.getPlayPosition() if seek else (1, 0)
         if position_result[0]:
-            if self.preparing is not None and steady_time() - self.preparing >= 4:
+            if self.preparing is not None and steady_time() - self.preparing >= int(settings.startup_delay.value):
                 self.release()
             self.overlay.hide()
             return
@@ -441,16 +554,21 @@ class PlaybackMonitor(object):
         now = steady_time()
         state = self.runtime.state()
         if self.preparing is not None:
-            if self.paused is None:
-                pause = service.pause()
-                if pause and pause.pause() == 0:
-                    self.paused = pause
-                else:
-                    self.release()
-            if (now - self.preparing >= 4 if self.preparing is not None else False) or state.get("error") or (
-                    state.get("generation") == self.generation and state.get("cues")):
+            if self.preview_position is None:
+                self.preview_position = position
+            if state.get("error"):
                 self.release()
-        if self.previous_position is not None and self.preparing is None:
+            elif position - self.preview_position >= int(settings.startup_delay.value) * 1000:
+                origin = self.preview_position
+                if seek.seekTo(origin * 90) == 0:
+                    position = origin
+                    self.previous_position = self.previous_time = None
+                    self.rewind_guard_until = now + 1
+                    logger().info("Initial preview rewound: origin_ms=%d preview_ms=%d", origin, int(settings.startup_delay.value) * 1000)
+                else:
+                    logger().warning("Unable to rewind initial preview")
+                self.release()
+        if self.previous_position is not None and self.preparing is None and now >= self.rewind_guard_until:
             delta = position - self.previous_position
             if delta < -1000 or delta > (now - self.previous_time) * 1000 + 1500:
                 self.generation += 1
@@ -474,12 +592,15 @@ class PlaybackMonitor(object):
             self.generation += 1
             self.scheduler.reset()
         self.audio_stream = audio_stream
-        self.runtime.command(path, settings.target.value, settings.model.value, self.generation, position, audio_stream)
+        self.runtime.command(path, settings.target.value, settings.model.value, self.generation, position, audio_stream,
+            self.preview_position if self.preparing is not None else None, int(settings.startup_delay.value) * 1000)
         if state.get("error") != self.last_error:
             self.last_error = state.get("error")
             if self.last_error:
                 logger().warning("Subtitle status: %s", self.last_error)
-        if state.get("generation") == self.generation:
+        if self.preparing is not None:
+            self.overlay.hide()
+        elif state.get("generation") == self.generation:
             correction = int(float(settings.sync.value) * 1000)
             if correction != self.correction:
                 self.scheduler.reset()
@@ -503,6 +624,8 @@ monitor = None
 def session_start(reason, session=None, **kwargs):
     global monitor
     if reason == 0 and session is not None and monitor is None:
+        settings.enabled.value = False
+        settings.enabled.save()
         monitor = PlaybackMonitor(session)
     elif reason == 1 and monitor is not None:
         monitor.stop()
@@ -510,10 +633,15 @@ def session_start(reason, session=None, **kwargs):
 
 
 def main(session, **kwargs):
-    session.open(SettingsScreen)
+    def selected(reference=None):
+        if reference is not None:
+            from Screens.MoviePlayer import MoviePlayer
+            session.open(MoviePlayer, reference)
+    session.openWithCallback(selected, SettingsScreen)
 
 
 def Plugins(**kwargs):
     return [PluginDescriptor(name="E2PVR", description="PVR subtitles", icon="plugin.png", where=PluginDescriptor.WHERE_PLUGINMENU, fnc=main),
+            PluginDescriptor(name="E2PVR", description="PVR subtitles", where=PluginDescriptor.WHERE_EXTENSIONSMENU, fnc=main),
             PluginDescriptor(where=PluginDescriptor.WHERE_SESSIONSTART, fnc=session_start),
             PluginDescriptor(where=PluginDescriptor.WHERE_AUTOSTART, fnc=session_start)]
