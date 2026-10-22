@@ -6,7 +6,7 @@ from pathlib import Path
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 NAME = "enigma2-plugin-extensions-e2pvr"
 
 
@@ -50,9 +50,9 @@ def main():
     files = []
     source = ROOT / "src" / "E2PVR"
     for path in sorted(source.rglob("*")):
-        if path.is_file() and "__pycache__" not in path.parts and path.suffix in (".py", ".json", ".txt", ".ttf"):
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix in (".py", ".json", ".txt", ".ttf", ".png"):
             files.append(("./usr/lib/enigma2/python/Plugins/Extensions/E2PVR/" + path.relative_to(source).as_posix(),
-                          path.read_bytes() if path.suffix == ".ttf" else path.read_bytes().replace(b"\r\n", b"\n"), 0o644))
+                          path.read_bytes() if path.suffix in (".ttf", ".png") else path.read_bytes().replace(b"\r\n", b"\n"), 0o644))
     for name in ("LICENSE", "README.md"):
         path = ROOT / name
         if path.is_file():

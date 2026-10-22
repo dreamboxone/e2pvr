@@ -2,11 +2,26 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "src"))
 from E2PVR.service import read_key, ServiceError
+from E2PVR.live import probe_live, connection_error
+import socket
 
 
 class ServiceTests(unittest.TestCase):
+    def test_live_probe_requires_setup_and_closes_session(self):
+        session = MagicMock()
+        session.ready.wait.return_value = False
+        session.error = "API key rejected"
+        with patch("E2PVR.live.LiveSession", return_value=session):
+            with self.assertRaisesRegex(ServiceError, "API key rejected"):
+                probe_live("ru")
+        session.close.assert_called_once()
+
+    def test_dns_failure_is_distinct_from_key_rejection(self):
+        self.assertIn("DNS", connection_error(socket.gaierror(-3, "failure")))
+
     def test_dotted_key_and_bom_are_accepted(self):
         with tempfile.TemporaryDirectory() as directory:
             path = os.path.join(directory,"key")

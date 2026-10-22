@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 import json
 import threading
+import socket
+import ssl
 from .core import steady_time
 from .service import read_key, ServiceError
 from .transport import WebSocket, WebSocketUpgradeError
@@ -12,6 +14,10 @@ MODEL = "gemini-3.5-live-translate-preview"
 def connection_error(error):
     if isinstance(error, ServiceError):
         return str(error)
+    if isinstance(error, socket.gaierror):
+        return "DNS lookup failed; check receiver network"
+    if isinstance(error, (socket.timeout, ssl.SSLError)):
+        return "Secure connection failed or timed out"
     if isinstance(error, WebSocketUpgradeError):
         if error.error_kind == "edge_block":
             return "Network route denied by service"
@@ -20,8 +26,21 @@ def connection_error(error):
     return "Live connection failed; retrying"
 
 
+def probe_live(target="fa"):
+    session = None
+    try:
+        session = LiveSession(target, lambda content: None)
+        if not session.ready.wait(10):
+            raise ServiceError(session.error or "Live setup timed out")
+    except Exception as error:
+        raise ServiceError(connection_error(error))
+    finally:
+        if session is not None:
+            session.close()
+
+
 def setup(target, handle=None):
-    if target not in ("fa", "ar"):
+    if target not in ("fa", "ar", "ru"):
         raise ServiceError("Unsupported subtitle language")
     return {"setup": {"model": "models/" + MODEL,
         "generationConfig": {"responseModalities": ["TEXT"], "translationConfig": {

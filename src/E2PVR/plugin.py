@@ -18,6 +18,7 @@ except ImportError:
 from .core import SubtitleTrack, overlay_geometry, logger, steady_time, split_cues, CueScheduler
 from .service import KEY_FILE, DEFAULT_MODEL, MODELS, probe, read_key, ServiceError
 from .runtime import Runtime
+from .live import probe_live
 
 
 def native_text(text):
@@ -56,7 +57,7 @@ settings = config.plugins.e2pvr
 if not hasattr(settings, "language"):
     settings.language = ConfigSelection(default="en", choices=[("en", "English"), ("fa", "فارسی"), ("ar", "العربية")])
     settings.enabled = ConfigYesNo(default=False)
-    settings.target = ConfigSelection(default="fa", choices=[("fa", "فارسی"), ("ar", "العربية")])
+    settings.target = ConfigSelection(default="fa", choices=[("fa", "فارسی"), ("ar", "العربية"), ("ru", "Русский")])
     settings.color = ConfigSelection(default="ffffff", choices=[("ffffff", "White"), ("ffff00", "Yellow"), ("00ff00", "Green"), ("00ffff", "Cyan")])
     settings.size = ConfigSelection(default="medium", choices=[("small", "Small"), ("medium", "Medium"), ("large", "Large")])
     fonts = available_fonts()
@@ -88,6 +89,15 @@ TRANSLATIONS = {
     "Key file found. Internet is required.": ("فایل کلید موجود است. اتصال اینترنت لازم است.", "ملف المفتاح موجود. يلزم اتصال بالإنترنت."),
     "Checking connection...": ("در حال آزمایش اتصال...", "جار اختبار الاتصال..."),
     "Connection successful": ("اتصال موفق بود", "نجح الاتصال"),
+    "Start translation": ("شروع ترجمه", "بدء الترجمة"),
+    "Stop translation": ("توقف ترجمه", "إيقاف الترجمة"),
+    "Translation stopped": ("ترجمه متوقف است", "الترجمة متوقفة"),
+    "Ready - play a recorded movie": ("آماده؛ یک فیلم ضبط‌شده پخش کنید", "جاهز؛ شغّل فيلماً مسجلاً"),
+    "Connecting to subtitle service...": ("در حال اتصال به سرویس زیرنویس...", "جار الاتصال بخدمة الترجمة..."),
+    "Translating recording": ("در حال ترجمه فیلم", "جار ترجمة التسجيل"),
+    "Connection test timed out; check receiver network": ("مهلت آزمایش تمام شد؛ شبکه ریسیور را بررسی کنید", "انتهت مهلة الاختبار؛ تحقق من شبكة الجهاز"),
+    "DNS lookup failed; check receiver network": ("نام سرویس پیدا نشد؛ شبکه ریسیور را بررسی کنید", "تعذر العثور على الخدمة؛ تحقق من شبكة الجهاز"),
+    "Live setup timed out": ("مهلت آماده‌سازی اتصال تمام شد", "انتهت مهلة إعداد الاتصال"),
     "API key rejected": ("کلید سرویس پذیرفته نشد", "تم رفض مفتاح الخدمة"),
     "Service access denied": ("دسترسی به سرویس مجاز نیست", "تم رفض الوصول إلى الخدمة"),
     "Service model unavailable": ("مدل سرویس در دسترس نیست", "نموذج الخدمة غير متاح"),
@@ -148,14 +158,44 @@ class SettingsScreen(Screen):
         self["status"] = Label("")
         self.testing = False
         self.test_result = None
+        self.test_attempt = 0
         self.timer = eTimer()
         self.connection = bind_timer(self.timer, self.update_test)
         self.onClose.append(self.timer.stop)
         self["actions"] = ActionMap(["SetupActions", "ColorActions", "DirectionActions"], {
-            "green": self.save, "red": self.cancel, "cancel": self.cancel, "save": self.save,
+            "green": self.save, "red": self.toggle_translation, "cancel": self.cancel, "save": self.save,
             "yellow": self.check_connection, "left": self.keyLeft, "right": self.keyRight,
             "up": lambda: self.move(-1), "down": lambda: self.move(1)}, -2)
         self.rebuild()
+        self.timer.start(200)
+
+    def toggle_translation(self):
+        settings.enabled.value = not settings.enabled.value
+        settings.enabled.save()
+        configfile.save()
+        if monitor:
+            monitor.update()
+        self.rebuild()
+
+    def refresh_status(self):
+        if self.testing or self.test_result is not None:
+            return
+        try:
+            read_key()
+            state = monitor.runtime.state() if monitor and monitor.runtime else {}
+            if not settings.enabled.value:
+                status = "Translation stopped"
+            elif state.get("error"):
+                status = state["error"]
+            elif not monitor or not monitor.path:
+                status = "Ready - play a recorded movie"
+            elif state.get("ready"):
+                status = "Translating recording"
+            else:
+                status = "Connecting to subtitle service..."
+        except ServiceError as error:
+            status = str(error)
+        self["status"].setText(tr(status))
 
     def rebuild(self):
         self.setTitle("E2PVR - " + tr("Settings"))
@@ -166,7 +206,7 @@ class SettingsScreen(Screen):
             ("Subtitle language", settings.target), ("Color", settings.color), ("Font", settings.font),
             ("Font size", settings.size), ("Vertical position (%)", settings.position),
             ("Box transparency (%)", settings.transparency), ("Subtitle timing (seconds)", settings.sync)]
-        for name, label in [("save", "Save"), ("cancel", "Cancel"), ("test", "Check connection")]:
+        for name, label in [("save", "Save"), ("cancel", "Stop translation" if settings.enabled.value else "Start translation"), ("test", "Check connection")]:
             self[name].setText(tr(label))
         try:
             read_key()
@@ -176,6 +216,7 @@ class SettingsScreen(Screen):
         except ServiceError as error:
             status = str(error)
         self["status"].setText(tr(status))
+        self.refresh_status()
         self.refresh_rows()
 
     def move(self, direction):
@@ -213,25 +254,33 @@ class SettingsScreen(Screen):
         if self.testing:
             return
         self.testing = True
+        self.test_attempt += 1
+        attempt = self.test_attempt
+        self.test_started = steady_time()
         self.test_result = None
         self["status"].setText(tr("Checking connection..."))
-        model = settings.model.value
+        target = settings.target.value
         def check():
             try:
-                probe(model)
-                self.test_result = "Connection successful"
+                probe_live(target)
+                message = "Connection successful"
             except Exception as error:
-                self.test_result = str(error)
+                message = str(error)
+            if attempt == self.test_attempt:
+                self.test_result = message
         thread = threading.Thread(target=check)
         thread.daemon = True
         thread.start()
         self.timer.start(200)
 
     def update_test(self):
+        if self.testing and steady_time() - self.test_started >= 60:
+            self.test_attempt += 1
+            self.test_result = "Connection test timed out; check receiver network"
         if self.test_result is not None:
             self["status"].setText(tr(self.test_result))
             self.testing = False
-            self.timer.stop()
+        self.refresh_status()
 
     def save(self):
         for _, value in self.rows:
@@ -457,6 +506,6 @@ def main(session, **kwargs):
 
 
 def Plugins(**kwargs):
-    return [PluginDescriptor(name="E2PVR", description="PVR subtitles", where=PluginDescriptor.WHERE_PLUGINMENU, fnc=main),
+    return [PluginDescriptor(name="E2PVR", description="PVR subtitles", icon="plugin.png", where=PluginDescriptor.WHERE_PLUGINMENU, fnc=main),
             PluginDescriptor(where=PluginDescriptor.WHERE_SESSIONSTART, fnc=session_start),
             PluginDescriptor(where=PluginDescriptor.WHERE_AUTOSTART, fnc=session_start)]

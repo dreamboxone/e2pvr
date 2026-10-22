@@ -1,10 +1,11 @@
 # E2PVR
 
-PVR subtitle translation for Enigma2, version 0.2.0.
+PVR subtitle translation for Enigma2, version 0.2.1.
 
 The receiver streams the selected audio track of a local recording to Gemini
 Live and displays translated subtitles. Source language is detected automatically.
-Persian and Arabic are available as subtitle targets. The plugin does not play
+Persian, Arabic and Russian are available as subtitle targets. Kurdish Kurmanji is unavailable in the current service: `ku` returned Sorani
+in receiver testing, while `ku-Latn` and `kmr` sessions were closed by the service. The plugin does not play
 translated audio and needs no local model.
 
 ## Installation
@@ -25,8 +26,12 @@ After installation, package archives matching
 Use the generated package filename when uploading to `/tmp`. Other filenames
 and files outside `/tmp` are not removed.
 
-Open E2PVR from the plugin menu, use the yellow button to check connectivity,
-enable subtitles, and save. Play a local recording with the image's player.
+Open E2PVR from the plugin menu. Red starts or stops translation immediately;
+green saves display preferences and closes the menu; Exit cancels unsaved display
+changes. Yellow tests the actual subtitle connection with a 60-second display
+deadline. Play a local recording with the image's player. Reopen E2PVR and press red
+to stop. The status distinguishes a stopped session, waiting for a recording,
+connecting, active translation, and connection errors.
 Internet access and a working API key with quota are required. The default
 service model is `gemini-3.5-live-translate-preview`.
 
