@@ -11,11 +11,11 @@ import time
 if not __package__:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from E2PVR.core import logger, steady_time
-    from E2PVR.state import read_json, atomic_json
+    from E2PVR.storage import read_json, atomic_json
     from E2PVR.live import LiveSession, connection_error
 else:
     from .core import logger, steady_time
-    from .state import read_json, atomic_json
+    from .storage import read_json, atomic_json
     from .live import LiveSession, connection_error
 
 

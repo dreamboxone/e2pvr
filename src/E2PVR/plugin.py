@@ -21,7 +21,7 @@ from .core import SubtitleTrack, overlay_geometry, logger, steady_time, split_cu
 from .service import KEY_FILE, DEFAULT_MODEL, MODELS, probe, read_key, ServiceError
 from .runtime import Runtime
 from .live import probe_live
-from . import VERSION
+from . import VERSION, PACKAGE_DIR
 
 
 def native_text(text):
@@ -34,7 +34,7 @@ def available_fonts():
     choices = [("Regular", "Regular")]
     if addFont is None:
         return choices
-    bundled = os.path.join(os.path.dirname(__file__), "Vazirmatn-SemiBold.ttf")
+    bundled = os.path.join(PACKAGE_DIR, "Vazirmatn-SemiBold.ttf")
     if os.path.isfile(bundled):
         try:
             addFont(native_text(bundled), "E2PVR_Vazirmatn", 100, False)

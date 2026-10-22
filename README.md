@@ -1,6 +1,6 @@
 # E2PVR
 
-PVR subtitle translation for Enigma2, version 0.2.2.
+PVR subtitle translation for Enigma2, version 0.2.3.
 
 The receiver streams the selected audio track of a local recording to Gemini
 Live and displays translated subtitles. Source language is detected automatically.
@@ -94,3 +94,25 @@ python tools/build_packages.py
 Both package formats are deterministic archives with SHA-256 sidecars in `dist`.
 Do not infer successful live translation from parser tests or SRT display tests:
 authenticated service and audio-language tests are separate validation steps.
+
+## Native builds
+
+Universal DEB/IPK packages support Python 2.7 and Python 3. Native modules must
+be compiled separately for the receiver architecture, Python ABI, Unicode
+width and compatible C library. The Dreambox One build targets ARM64 and
+Python 2.7 with the receiver's own configuration headers. It is not a Python 3
+or universal OE-Alliance binary.
+
+`tools/build_native.py` accepts an explicit Cython executable, cross compiler,
+strip tool, receiver-matched include directory and a new output directory.
+Generated C files remain outside the source tree. Only `__init__.py`, the
+platform profile and the worker entry script remain as Python in a native
+payload; application modules are stripped shared libraries. Native builds make
+source inspection less convenient, but do not prevent copying or reverse
+engineering. Publicly distributed source remains available regardless of the
+installed package format.
+
+Package the staged `E2PVR` directory with `tools/build_packages.py --native-root
+<staged-directory> --architecture arm64 --python-abi 2.7 --format deb`.
+Keep the universal packages for other receivers until their native builds have
+been tested on matching hardware.

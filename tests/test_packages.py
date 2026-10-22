@@ -26,7 +26,7 @@ def members(data):
 class PackageTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        builder.main()
+        builder.main([])
 
     def test_both_formats_include_parent_directories_and_correct_profile(self):
         for extension, profile, key_path in [("deb", "dreamos", "/root/apikey.txt"),
@@ -50,7 +50,7 @@ class PackageTests(unittest.TestCase):
     def test_archives_are_reproducible(self):
         paths = sorted((ROOT/"dist").glob("*_" + builder.VERSION + "_all.*"))
         before = {path: path.read_bytes() for path in paths}
-        builder.main()
+        builder.main([])
         for path, contents in before.items():
             self.assertEqual(path.read_bytes(), contents)
 

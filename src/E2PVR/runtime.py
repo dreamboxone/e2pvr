@@ -9,7 +9,8 @@ import subprocess
 import sys
 import tempfile
 import threading
-from .state import atomic_json, read_json
+from .storage import atomic_json, read_json
+from . import PACKAGE_DIR
 
 
 def worker_python():
@@ -28,9 +29,9 @@ class Runtime(object):
         self.directory = tempfile.mkdtemp(prefix="e2pvr-")
         atomic_json(os.path.join(self.directory, "control.json"),
                     dict(source="", target=target, generation=0, position_ms=0))
-        root = os.path.dirname(__file__)
+        root = PACKAGE_DIR
         with open(os.path.join(self.directory, "worker.log"), "wb") as errors:
-            self.process = subprocess.Popen([worker_python(), os.path.join(root, "worker.py"), self.directory],
+            self.process = subprocess.Popen([worker_python(), os.path.join(root, "worker_main.py"), self.directory],
                 stdout=errors, stderr=errors, preexec_fn=os.setsid, close_fds=True)
 
     def state(self):

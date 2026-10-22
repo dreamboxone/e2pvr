@@ -6,9 +6,10 @@ import hashlib
 import io
 from pathlib import Path
 import tarfile
+import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 NAME = "enigma2-plugin-extensions-e2pvr"
 
 
@@ -46,32 +47,41 @@ def ar(members):
     return bytes(result)
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--native-root", type=Path)
+    parser.add_argument("--architecture", default="all")
+    parser.add_argument("--format", choices=("deb", "ipk", "both"), default="both")
+    parser.add_argument("--python-abi", choices=("2.7", "3"))
+    arguments = parser.parse_args(argv)
+    if arguments.native_root and arguments.architecture == "all":
+        parser.error("Native packages require an explicit receiver architecture")
     output = ROOT / "dist"
     output.mkdir(exist_ok=True)
     files = []
-    source = ROOT / "src" / "E2PVR"
+    source = arguments.native_root or ROOT / "src" / "E2PVR"
     for path in sorted(source.rglob("*")):
-        if path.is_file() and "__pycache__" not in path.parts and path.suffix in (".py", ".json", ".txt", ".ttf", ".png"):
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix in (".py", ".json", ".txt", ".ttf", ".png", ".so"):
             files.append(("./usr/lib/enigma2/python/Plugins/Extensions/E2PVR/" + path.relative_to(source).as_posix(),
-                          path.read_bytes() if path.suffix in (".ttf", ".png") else path.read_bytes().replace(b"\r\n", b"\n"), 0o644))
+                          path.read_bytes() if path.suffix in (".ttf", ".png", ".so") else path.read_bytes().replace(b"\r\n", b"\n"), 0o644))
     for name in ("LICENSE", "README.md"):
         path = ROOT / name
         if path.is_file():
             files.append(("./usr/share/doc/" + NAME + "/" + name, path.read_bytes(), 0o644))
-    for extension in ("deb", "ipk"):
+    for extension in (("deb", "ipk") if arguments.format == "both" else (arguments.format,)):
         plugin_root = "./usr/lib/enigma2/python/Plugins/Extensions/E2PVR/"
         platform = "dreamos" if extension == "deb" else "oealliance-universal"
         payload = [item for item in files if item[0] != plugin_root + "platform_profile.py"]
         payload.append((plugin_root + "platform_profile.py", ('PLATFORM_PROFILE = "%s"\n' % platform).encode("ascii"), 0o644))
         data = archive(payload)
-        dependency = ""
-        architecture = "all"
+        dependency = {"2.7": ", python-core (>= 2.7), python-core (<< 2.8)",
+                      "3": ", python3-core"}.get(arguments.python_abi, "")
+        architecture = arguments.architecture
         control = ("Package: %s\nVersion: %s\nArchitecture: %s\nSection: extra\nPriority: optional\n"
                    "Maintainer: Routekernel\nDepends: enigma2, ffmpeg, ca-certificates%s\n"
                    "Description: PVR subtitle translation\n"
                    " Online subtitle translation during recording playback.\n" %
-                   (NAME, VERSION, architecture, ", " + dependency if dependency else ""))
+                   (NAME, VERSION, architecture, dependency))
         postinst = '''#!/bin/sh
 set -e
 KEY_FILE=__KEY_FILE__
