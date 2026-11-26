@@ -18,59 +18,83 @@
 
 <div dir="rtl" align="right">
 
-## فارسی
+<h2 dir="rtl" align="right">فارسی</h2>
 
-E2PVR صدای فیلم ضبط‌شده را از طریق Gemini Live ترجمه می‌کند و زیرنویس را روی تصویر نمایش می‌دهد. ریسیور به اینترنت، FFmpeg و کلید معتبر Gemini API نیاز دارد.
+<p dir="rtl" align="right">E2PVR صدای فیلم ضبط‌شده را از طریق Gemini Live ترجمه می‌کند و زیرنویس را روی تصویر نمایش می‌دهد. ریسیور به اینترنت، FFmpeg و کلید معتبر Gemini API نیاز دارد.</p>
 
-### نصب
+<h3 dir="rtl" align="right">نصب</h3>
 
-بستهٔ مناسب را از صفحهٔ انتشارها دانلود کنید، با نام اصلی به پوشهٔ `/tmp` ریسیور منتقل کنید و با حساب `root` از طریق SSH وارد ریسیور شوید. هنگام اجرا، فقط یک فایل نصب E2PVR از نوع انتخاب‌شده در `/tmp` قرار دهید. [دانلود بسته‌ها](https://github.com/dreamboxone/e2pvr/releases/latest)
+<p dir="rtl" align="right">بستهٔ مناسب را از صفحهٔ انتشارها دانلود کنید، با نام اصلی به پوشهٔ <code>/tmp</code> ریسیور منتقل کنید و با حساب <code>root</code> از طریق SSH وارد ریسیور شوید. هنگام اجرا، فقط یک فایل نصب E2PVR از نوع انتخاب‌شده در <code>/tmp</code> قرار دهید. <a href="https://github.com/dreamboxone/e2pvr/releases/latest">دانلود بسته‌ها</a></p>
 
-**DreamOS با بستهٔ DEB**
+<p dir="rtl" align="right"><strong>DreamOS با بستهٔ DEB</strong></p>
+
+<div dir="ltr" align="left">
 
 ```sh
 dpkg -i /tmp/enigma2-plugin-extensions-e2pvr_*.deb
 ```
 
-**ایمیج‌های مبتنی بر opkg با بستهٔ IPK**
+</div>
+
+<p dir="rtl" align="right"><strong>ایمیج‌های مبتنی بر opkg با بستهٔ IPK</strong></p>
+
+<div dir="ltr" align="left">
 
 ```sh
 opkg install /tmp/enigma2-plugin-extensions-e2pvr_*.ipk
 ```
 
-پس از نصب، رابط Enigma2 دوباره راه‌اندازی می‌شود و فایل نصب از `/tmp` پاک می‌شود. کلید Gemini API را به‌تنهایی در یک خط در فایل مربوط به بسته قرار دهید.
+</div>
 
-- DEB: فایل `/root/apikey.txt`
-- IPK: فایل `/home/root/apikey.txt`
+<p dir="rtl" align="right">پس از نصب، رابط Enigma2 دوباره راه‌اندازی می‌شود و فایل نصب از <code>/tmp</code> پاک می‌شود. کلید Gemini API را به‌تنهایی در یک خط در فایل مربوط به بسته قرار دهید.</p>
 
-### حذف افزونه
+<ul dir="rtl" align="right">
+  <li dir="rtl" align="right">DEB: فایل <code>/root/apikey.txt</code></li>
+  <li dir="rtl" align="right">IPK: فایل <code>/home/root/apikey.txt</code></li>
+</ul>
 
-**روی DreamOS**
+<h3 dir="rtl" align="right">حذف افزونه</h3>
+
+<p dir="rtl" align="right"><strong>روی DreamOS</strong></p>
+
+<div dir="ltr" align="left">
 
 ```sh
 dpkg -r enigma2-plugin-extensions-e2pvr
 ```
 
-**روی ایمیج‌های مبتنی بر opkg**
+</div>
+
+<p dir="rtl" align="right"><strong>روی ایمیج‌های مبتنی بر opkg</strong></p>
+
+<div dir="ltr" align="left">
 
 ```sh
 opkg remove enigma2-plugin-extensions-e2pvr
 ```
 
-پس از حذف، رابط Enigma2 را دوباره راه‌اندازی کنید. فایل کلید API برای نصب‌های بعدی حفظ می‌شود.
+</div>
 
-### استفاده
+<p dir="rtl" align="right">پس از حذف، رابط Enigma2 را دوباره راه‌اندازی کنید. فایل کلید API برای نصب‌های بعدی حفظ می‌شود.</p>
 
-1. یک فیلم ضبط‌شده را از PVR پخش کنید و **E2PVR** را از منوی **Plugins** یا **Extensions** باز کنید.
-2. زبان برنامه و زبان زیرنویس را جداگانه انتخاب کنید. با دکمهٔ **زرد** می‌توانید اتصال به سرویس ترجمه را آزمایش کنید.
-3. دکمهٔ **قرمز** ترجمه را شروع می‌کند و تنظیمات را ذخیره می‌کند. اگر فیلمی در حال پخش نباشد، فهرست ضبط‌ها برای انتخاب فیلم باز می‌شود.
-4. برای توقف، دوباره E2PVR را باز کنید و دکمهٔ **آبی** را بزنید. دکمهٔ **سبز** تنظیمات را ذخیره می‌کند و **Exit** از تغییرات ذخیره‌نشده صرف‌نظر می‌کند.
-5. استندبای ترجمه را متوقف می‌کند. پس از بیدار شدن ریسیور، برای شروع دوباره **قرمز** را بزنید.
+<h3 dir="rtl" align="right">استفاده</h3>
 
-برای دیدن آخرین پیام‌های لاگ این دستور را روی ریسیور اجرا کنید.
+<ol dir="rtl" align="right">
+  <li dir="rtl" align="right">یک فیلم ضبط‌شده را از PVR پخش کنید و <strong>E2PVR</strong> را از منوی <strong>Plugins</strong> یا <strong>Extensions</strong> باز کنید.</li>
+  <li dir="rtl" align="right">زبان برنامه و زبان زیرنویس را جداگانه انتخاب کنید. با دکمهٔ <strong>زرد</strong> می‌توانید اتصال به سرویس ترجمه را آزمایش کنید.</li>
+  <li dir="rtl" align="right">دکمهٔ <strong>قرمز</strong> ترجمه را شروع می‌کند و تنظیمات را ذخیره می‌کند. اگر فیلمی در حال پخش نباشد، فهرست ضبط‌ها برای انتخاب فیلم باز می‌شود.</li>
+  <li dir="rtl" align="right">برای توقف، دوباره E2PVR را باز کنید و دکمهٔ <strong>آبی</strong> را بزنید. دکمهٔ <strong>سبز</strong> تنظیمات را ذخیره می‌کند و <strong>Exit</strong> از تغییرات ذخیره‌نشده صرف‌نظر می‌کند.</li>
+  <li dir="rtl" align="right">استندبای ترجمه را متوقف می‌کند. پس از بیدار شدن ریسیور، برای شروع دوباره <strong>قرمز</strong> را بزنید.</li>
+</ol>
+
+<p dir="rtl" align="right">برای دیدن آخرین پیام‌های لاگ این دستور را روی ریسیور اجرا کنید.</p>
+
+<div dir="ltr" align="left">
 
 ```sh
 tail -n 100 /tmp/e2pvr.log
 ```
+
+</div>
 
 </div>
