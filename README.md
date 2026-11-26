@@ -1,7 +1,20 @@
-# E2PVR
+<h1 align="center">
+  <img alt="E2PVR" src="src/E2PVR/plugin.png" width="260">
+</h1>
 
-[![Total release downloads](https://img.shields.io/github/downloads/dreamboxone/e2pvr/total)](https://github.com/dreamboxone/e2pvr/releases)
-[Telegram @routekernel1](https://t.me/routekernel1) · [راهنمای فارسی](#فارسی) · [English](#english)
+<p align="center" dir="rtl"><b>ترجمهٔ زیرنویس فیلم‌های ضبط‌شده در Enigma2</b></p>
+
+<p align="center">
+  <a href="https://github.com/dreamboxone/e2pvr/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/dreamboxone/e2pvr?style=for-the-badge&amp;color=0b3d91"></a>
+  <a href="https://github.com/dreamboxone/e2pvr/releases"><img alt="Total release downloads" src="https://img.shields.io/github/downloads/dreamboxone/e2pvr/total?style=for-the-badge"></a>
+  <a href="https://t.me/routekernel1"><img alt="Telegram @routekernel1" src="https://img.shields.io/badge/Telegram-routekernel1-26A5E4?style=for-the-badge&amp;logo=telegram&amp;logoColor=white"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/dreamboxone/e2pvr/releases/latest">دانلود آخرین نسخه</a> ·
+  <a href="#فارسی">راهنمای فارسی</a> ·
+  <a href="#english">English</a>
+</p>
 
 <div dir="rtl" align="right">
 
