@@ -46,7 +46,7 @@ opkg install /tmp/enigma2-plugin-extensions-e2pvr_*.ipk
 
 </div>
 
-<p dir="rtl" align="right">پس از نصب، رابط Enigma2 دوباره راه‌اندازی می‌شود و فایل نصب از <code>/tmp</code> پاک می‌شود. کلید Gemini API را به‌تنهایی در یک خط در فایل مربوط به بسته قرار دهید.</p>
+<p dir="rtl" align="right">پس از نصب، رابط Enigma2 ریبوت میشود و فایل نصب از <code>/tmp</code> پاک می‌شود. کلید Gemini API را به‌تنهایی در یک خط در فایل مربوط به بسته قرار دهید.</p>
 
 <ul dir="rtl" align="right">
   <li dir="rtl" align="right">DEB: فایل <code>/root/apikey.txt</code></li>
