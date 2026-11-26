@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2026 Routekernel. All rights reserved.
 # Licensed under the project LICENSE; third-party notices remain applicable.
-VERSION = "0.2.7"
+VERSION = "1.0.0"
 import os
 PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))

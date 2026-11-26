@@ -6,11 +6,12 @@ import json
 import threading
 import socket
 import ssl
-from .core import steady_time
-from .service import read_key, ServiceError
+from .core import logger, steady_time
+from .service import read_keys, ServiceError
 from .transport import WebSocket, WebSocketUpgradeError
 
 MODEL = "gemini-3.5-live-translate-preview"
+KEY_ERRORS = ("API key rejected", "Service access denied", "Service quota exceeded")
 
 
 def connection_error(error):
@@ -28,17 +29,36 @@ def connection_error(error):
     return "Live connection failed; retrying"
 
 
+def open_live(target, on_message, preferred=None, handle=None, rejected=None):
+    keys = read_keys()
+    if preferred in keys:
+        keys.remove(preferred)
+        keys.insert(0, preferred)
+    if rejected in keys:
+        keys.remove(rejected)
+        keys.append(rejected)
+    last_error = None
+    for key in keys:
+        session = None
+        try:
+            session = LiveSession(target, on_message, key, handle if key == preferred else None)
+            session.setup_finished.wait(10)
+            if not session.ready.is_set() or session.closed.is_set():
+                raise ServiceError(session.error or "Live setup timed out")
+            return session
+        except Exception as error:
+            if session is not None:
+                session.close()
+            last_error = connection_error(error)
+            if last_error not in KEY_ERRORS:
+                raise ServiceError(last_error)
+            logger().warning("Gemini credential attempt failed: %s", last_error)
+    raise ServiceError(last_error)
+
+
 def probe_live(target="fa"):
-    session = None
-    try:
-        session = LiveSession(target, lambda content: None)
-        if not session.ready.wait(10):
-            raise ServiceError(session.error or "Live setup timed out")
-    except Exception as error:
-        raise ServiceError(connection_error(error))
-    finally:
-        if session is not None:
-            session.close()
+    session = open_live(target, lambda content: None)
+    session.close()
 
 
 def setup(target, handle=None):
@@ -52,16 +72,22 @@ def setup(target, handle=None):
 
 
 class LiveSession(object):
-    def __init__(self, target, on_message, handle=None):
-        self.ws = WebSocket(read_key())
+    def __init__(self, target, on_message, key, handle=None):
+        self.key = key
+        self.ws = WebSocket(key)
         self.error = None
         self.closed = threading.Event()
         self.ready = threading.Event()
+        self.setup_finished = threading.Event()
         self.on_message = on_message
         self.handle = None
         self.rotate_at = None
-        self.ws.connect()
-        self.ws.send_json(setup(target, handle))
+        try:
+            self.ws.connect()
+            self.ws.send_json(setup(target, handle))
+        except Exception:
+            self.ws.close()
+            raise
         self.reader = threading.Thread(target=self.receive)
         self.reader.daemon = True
         self.reader.start()
@@ -78,6 +104,7 @@ class LiveSession(object):
                         429: "Service quota exceeded"}.get(code, "Live service unavailable"))
                 if "setupComplete" in value:
                     self.ready.set()
+                    self.setup_finished.set()
                 update = value.get("sessionResumptionUpdate") or {}
                 if update.get("resumable"):
                     self.handle = update.get("newHandle")
@@ -92,6 +119,7 @@ class LiveSession(object):
                 self.error = "Live connection closed" if not isinstance(error, ServiceError) else str(error)
         finally:
             self.closed.set()
+            self.setup_finished.set()
 
     def close(self):
         self.closed.set()

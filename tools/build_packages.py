@@ -9,7 +9,7 @@ import tarfile
 import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.7"
+VERSION = "1.0.0"
 NAME = "enigma2-plugin-extensions-e2pvr"
 
 

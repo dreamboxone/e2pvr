@@ -16,7 +16,7 @@
   <a href="README.ar.md">العربية</a>
 </p>
 
-PVR subtitle translation for Enigma2, version 0.2.7.
+PVR subtitle translation for Enigma2, version 1.0.0.
 
 The receiver streams the selected audio track of a local recording to Gemini
 Live and displays translated subtitles. Source language is detected automatically.
@@ -47,8 +47,9 @@ it does not exist. The same locations as E2Dub are used:
 - DreamOS DEB: `/root/apikey.txt`.
 - OE-Alliance IPK: `/home/root/apikey.txt`.
 
-Put the API key alone in this file. Existing keys are
-preserved on upgrades and package removal. Keys are never placed in package
+Put one Gemini API key per line in this file. The plugin tries the next key
+if the service rejects the current one or its quota runs out. Existing keys
+are preserved on upgrades and package removal. Keys are never placed in package
 contents, command arguments, request URLs or diagnostic logs.
 
 After installation, package archives matching
@@ -70,7 +71,7 @@ opkg-based Enigma2 images:
 opkg remove enigma2-plugin-extensions-e2pvr
 ```
 
-Restart Enigma2 after removal.
+Restart the receiver after removing the plugin.
 
 ## Usage
 

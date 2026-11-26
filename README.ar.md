@@ -38,7 +38,7 @@ dpkg -i /tmp/enigma2-plugin-extensions-e2pvr_*.deb
 opkg install /tmp/enigma2-plugin-extensions-e2pvr_*.ipk
 ```
 
-بعد التثبيت، تعاد تهيئة واجهة Enigma2 ويحذف ملف التثبيت من `/tmp`. ضع مفتاح Gemini API وحده في سطر واحد في الملف المناسب لحزمتك.
+بعد التثبيت، تعاد تهيئة واجهة Enigma2 ويحذف ملف التثبيت من `/tmp`. ضع كل مفتاح Gemini API في سطر منفصل في الملف المناسب لحزمتك. إذا رفضت الخدمة المفتاح الحالي أو نفدت حصته، يجرب البرنامج المفتاح التالي.
 
 - حزمة DEB تستخدم الملف `/root/apikey.txt`
 - حزمة IPK تستخدم الملف `/home/root/apikey.txt`
@@ -57,7 +57,7 @@ dpkg -r enigma2-plugin-extensions-e2pvr
 opkg remove enigma2-plugin-extensions-e2pvr
 ```
 
-أعد تشغيل واجهة Enigma2 بعد الإزالة. يبقى ملف مفتاح API محفوظا للتثبيت لاحقا.
+أعد تشغيل جهاز الاستقبال بعد إزالة البرنامج. يبقى ملف مفتاح API محفوظا للتثبيت لاحقا.
 
 ### الاستخدام
 

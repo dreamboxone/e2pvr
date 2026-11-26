@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Routekernel. All rights reserved.
 # Licensed under the project LICENSE; third-party notices remain applicable.
 from __future__ import unicode_literals
+from collections import OrderedDict
 import io
 import re
 import socket
@@ -24,20 +25,28 @@ class ServiceError(Exception):
         self.retryable = retryable
 
 
-def read_key(path=None):
+def read_keys(path=None):
     path = path or api_key_file()
     try:
         with io.open(path, encoding="utf-8-sig") as stream:
-            key = stream.read(4097).strip()
+            contents = stream.read(65537)
     except IOError:
         raise ServiceError("Key file is missing: " + path)
     except UnicodeError:
         raise ServiceError("Invalid key file: " + path)
-    if not key:
+    if not contents.strip():
         raise ServiceError("Key file is empty: " + path)
-    if len(key) > 4096 or not re.match(r"^[!-~]+$", key):
+    if len(contents) > 65536:
         raise ServiceError("Invalid key file: " + path)
-    return key
+    lines = (line.strip() for line in contents.split("\n"))
+    keys = list(OrderedDict.fromkeys(key for key in lines if len(key) <= 4096 and re.match(r"^[!-~]+$", key)))
+    if not keys:
+        raise ServiceError("Invalid key file: " + path)
+    return keys
+
+
+def read_key(path=None):
+    return read_keys(path)[0]
 
 
 class IPv4HTTPSConnection(HTTPSConnection):

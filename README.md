@@ -46,7 +46,7 @@ opkg install /tmp/enigma2-plugin-extensions-e2pvr_*.ipk
 
 </div>
 
-<p dir="rtl" align="right">پس از نصب، رابط Enigma2 ریبوت میشود و فایل نصب از <code>/tmp</code> پاک می‌شود. کلید Gemini API را به‌تنهایی در یک خط در فایل مربوط به بسته قرار دهید.</p>
+<p dir="rtl" align="right">پس از نصب، رابط Enigma2 ریبوت میشود و فایل نصب از <code>/tmp</code> پاک می‌شود. برای استفاده از چند کلید Gemini API، هر کلید را در یک خط جدا در فایل مربوط به بسته قرار دهید. اگر سرویس کلید فعلی را رد کند یا سهمیه آن تمام شود، پلاگین کلید بعدی را امتحان می‌کند.</p>
 
 <ul dir="rtl" align="right">
   <li dir="rtl" align="right">DEB: فایل <code>/root/apikey.txt</code></li>
@@ -75,7 +75,7 @@ opkg remove enigma2-plugin-extensions-e2pvr
 
 </div>
 
-<p dir="rtl" align="right">پس از حذف، رابط Enigma2 را دوباره راه‌اندازی کنید. فایل کلید API برای نصب‌های بعدی حفظ می‌شود.</p>
+<p dir="rtl" align="right">پس از حذف این پلاگین، رسیور را ری استارت کنید. فایل کلید API برای نصب‌های بعدی حفظ می‌شود.</p>
 
 <h3 dir="rtl" align="right">استفاده</h3>
 

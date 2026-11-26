@@ -13,12 +13,12 @@ if not __package__:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from E2PVR.core import logger, steady_time
     from E2PVR.storage import read_json, atomic_json
-    from E2PVR.live import LiveSession, connection_error
+    from E2PVR.live import KEY_ERRORS, open_live, connection_error
     from E2PVR.process_guard import guard_parent
 else:
     from .core import logger, steady_time
     from .storage import read_json, atomic_json
-    from .live import LiveSession, connection_error
+    from .live import KEY_ERRORS, open_live, connection_error
     from .process_guard import guard_parent
 
 
@@ -56,7 +56,7 @@ def run(directory):
     flow = dict(cursor=0, pending="", start=0, sequence=0, anchors=[], last_input_end=0,
                 pending_since=0, pending_end=0, changed_at=0, full_text="", committed=0)
     connection, decoder, active = None, None, None
-    session_handle = None
+    session_handle = preferred_key = rejected_key = None
     retry_at, publish_at, eof, failures = 0, 0, False, 0
 
     def commit(force=False):
@@ -153,9 +153,9 @@ def run(directory):
                 retry_at = 0
             if connection is None and steady_time() >= retry_at:
                 try:
-                    connection = LiveSession(command["target"], receive, session_handle)
-                    if not connection.ready.wait(10):
-                        raise RuntimeError(connection.error or "Live setup timed out")
+                    connection = open_live(command["target"], receive, preferred_key, session_handle, rejected_key)
+                    preferred_key = connection.key
+                    rejected_key = None
                     failures = 0
                     with lock:
                         state.update(ready=True, error=None)
@@ -176,7 +176,11 @@ def run(directory):
                     failures += 1
                     retry_at = steady_time() + min(60, 2 ** min(6, failures))
             if connection and (connection.closed.is_set() or connection.rotate_at is not None):
-                session_handle = connection.handle
+                key_failed = connection.error in KEY_ERRORS
+                if key_failed:
+                    rejected_key = connection.key
+                    logger().warning("Gemini credential stopped working: %s", connection.error)
+                session_handle = None if key_failed else connection.handle
                 connection.close()
                 connection = None
                 with lock:
@@ -191,7 +195,7 @@ def run(directory):
                         flow["full_text"], flow["committed"] = "", 0
                         flow["anchors"] = []
                     state.update(ready=False, error="Live connection interrupted; reconnecting")
-                retry_at = steady_time() + 0.25
+                retry_at = steady_time() + (2 if key_failed else 0.25)
             source = command.get("source")
             if source and connection and not eof:
                 if decoder is None:
