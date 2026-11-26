@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Routekernel. All rights reserved.
 # Licensed under the project LICENSE.
 from __future__ import unicode_literals
+import errno
 import os
 import shutil
 import struct
@@ -97,7 +98,11 @@ class Rasterizer(object):
         jobs, self.jobs = self.jobs, []
         for job in jobs:
             if job["process"].poll() is None:
-                job["process"].kill()
+                try:
+                    job["process"].kill()
+                except OSError as error:
+                    if error.errno != errno.ESRCH:
+                        logger().exception("Unable to stop subtitle shaping process")
         directory = self.directory
         def cleanup():
             for job in jobs:

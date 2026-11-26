@@ -166,6 +166,7 @@ def run(directory):
                     session_handle = None
                     stop_decoder()
                     decoder = None
+                    eof = False
                     with lock:
                         flow["cursor"] = max(0, command.get("position_ms", 0))
                         flow["pending"] = ""
@@ -184,6 +185,7 @@ def run(directory):
                         session_handle = None
                         stop_decoder()
                         decoder = None
+                        eof = False
                         flow["cursor"] = max(0, command.get("position_ms", 0))
                         flow["pending"] = ""
                         flow["full_text"], flow["committed"] = "", 0
@@ -213,7 +215,11 @@ def run(directory):
                         except Exception:
                             connection.close()
                     else:
-                        if decoder.wait() != 0:
+                        status = decoder.wait()
+                        logger().info("Audio stream ended: position_ms=%d playback_ms=%d status=%d",
+                                      flow["cursor"], position, status)
+                        if status != 0:
+                            logger().warning("Audio decoder exited with status %d", status)
                             with lock:
                                 state["error"] = "Unable to decode recording audio"
                         try:

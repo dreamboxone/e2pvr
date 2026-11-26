@@ -28,10 +28,10 @@ def main():
     for source in sorted((root / "src" / "E2PVR").iterdir()):
         if not source.is_file() or source.suffix in (".pyc", ".pyo"):
             continue
-        if source.suffix != ".py" or source.stem in ("__init__", "platform_profile", "worker_main"):
+        if source.suffix != ".py" or source.stem in ("__init__", "platform_profile", "plugin", "worker_main"):
             shutil.copyfile(str(source), str(package / source.name))
             continue
-        module_name = "interface" if source.stem == "plugin" else source.stem
+        module_name = source.stem
         c_file = generated / (module_name + ".c")
         subprocess.check_call([args.cython, "-" + args.python_major, "-D", "--module-name",
             "E2PVR." + module_name, "-o", str(c_file), str(source)])
@@ -41,11 +41,6 @@ def main():
             "-I" + str(args.include.parent),
             "-Wno-deprecated-declarations", "-o", str(library), str(c_file)])
         subprocess.check_call([args.strip, "--strip-unneeded", str(library)])
-        if source.stem == "plugin":
-            (package / "plugin.py").write_text(
-                "# Copyright (c) 2026 Routekernel. All rights reserved.\n"
-                "# Licensed under the project LICENSE.\n"
-                "import sys\nfrom . import interface\nsys.modules[__name__] = interface\n")
     print(package)
 
 

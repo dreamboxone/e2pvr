@@ -9,7 +9,7 @@ import tarfile
 import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.4"
+VERSION = "0.2.7"
 NAME = "enigma2-plugin-extensions-e2pvr"
 
 
@@ -79,6 +79,9 @@ def main(argv=None):
         data = archive(payload)
         dependency = {"2.7": ", python-core (>= 2.7), python-core (<< 2.8)",
                       "3": ", python3-core"}.get(arguments.python_abi, "")
+        if extension == "ipk":
+            dependency += {"2.7": ", python-ctypes", "3": ", python3-ctypes"}.get(
+                arguments.python_abi, ", python3-ctypes | python-ctypes")
         architecture = arguments.architecture
         control = ("Package: %s\nVersion: %s\nArchitecture: %s\nSection: extra\nPriority: optional\n"
                    "Maintainer: Routekernel\nDepends: enigma2, ffmpeg, ca-certificates%s\n"
@@ -88,31 +91,36 @@ def main(argv=None):
         postinst = '''#!/bin/sh
 set -e
 KEY_FILE=__KEY_FILE__
+root=${IPKG_INSTROOT:-${PKG_ROOT:-}}
+root=${root%/}
+KEY_FILE="$root$KEY_FILE"
 mkdir -p "$(dirname "$KEY_FILE")"
-if [ "$KEY_FILE" = /home/root/apikey.txt ]; then
-    chown root:root /home/root
-    chmod 700 /home/root
-fi
-for previous in /root/key.txt /root/apikey.txt /apikey.txt; do
-    if [ ! -e "$KEY_FILE" ] && [ -f "$previous" ] && [ ! -L "$previous" ]; then
+for previous in "$root/root/key.txt" "$root/root/apikey.txt" "$root/apikey.txt"; do
+    if [ ! -e "$KEY_FILE" ] && [ ! -L "$KEY_FILE" ] && [ -f "$previous" ] && [ ! -L "$previous" ]; then
         mv "$previous" "$KEY_FILE"
     fi
 done
-if [ ! -e "$KEY_FILE" ]; then
+if [ ! -e "$KEY_FILE" ] && [ ! -L "$KEY_FILE" ]; then
     (umask 077; set -C; : > "$KEY_FILE") || [ -e "$KEY_FILE" ]
 fi
 if [ ! -f "$KEY_FILE" ] || [ -L "$KEY_FILE" ]; then
     echo "e2pvr: key must be a regular file" >&2
-    exit 1
+else
+    if [ -z "$root" ]; then
+        chown root:root "$KEY_FILE"
+    fi
+    chmod 600 "$KEY_FILE"
+    previous="$root/root/key.txt"
+    if [ -f "$previous" ] && [ ! -L "$previous" ] && cmp -s "$previous" "$KEY_FILE"; then
+        rm -f "$previous"
+    fi
 fi
-chown root:root "$KEY_FILE"
-chmod 600 "$KEY_FILE"
-if [ -f /root/key.txt ] && [ ! -L /root/key.txt ] && cmp -s /root/key.txt "$KEY_FILE"; then
-    rm -f /root/key.txt
-fi
-plugin_dir=/usr/lib/enigma2/python/Plugins/Extensions/E2PVR
+plugin_dir="$root/usr/lib/enigma2/python/Plugins/Extensions/E2PVR"
 if [ -d "$plugin_dir" ]; then
     find "$plugin_dir" -type f \\( -name '*.pyc' -o -name '*.pyo' \\) -exec rm -f -- {} \\;
+fi
+if [ -n "$root" ]; then
+    exit 0
 fi
 for archive in /tmp/enigma2-plugin-extensions-e2pvr*.deb /tmp/enigma2-plugin-extensions-e2pvr*.ipk /tmp/e2pvr*.deb /tmp/e2pvr*.ipk; do
     if [ -f "$archive" ]; then
@@ -138,7 +146,9 @@ exit 0
 '''.replace("__KEY_FILE__", "/root/apikey.txt" if extension == "deb" else "/home/root/apikey.txt")
         metadata = archive([("./control", control.encode("utf-8"), 0o644),
                             ("./postinst", postinst.encode("utf-8"), 0o755)])
-        package = ar([("debian-binary", b"2.0\n"), ("control.tar.gz", metadata), ("data.tar.gz", data)])
+        members = [("debian-binary", b"2.0\n"), ("control.tar.gz", metadata), ("data.tar.gz", data)]
+        package = ar(members) if extension == "deb" else archive(
+            [("./" + name, content, 0o644) for name, content in members])
         path = output / (NAME + "_" + VERSION + "_" + architecture + "." + extension)
         path.write_bytes(package)
         path.with_suffix(path.suffix + ".sha256").write_text(hashlib.sha256(package).hexdigest() + "  " + path.name + "\n")

@@ -1,6 +1,6 @@
 # E2PVR
 
-PVR subtitle translation for Enigma2, version 0.2.4.
+PVR subtitle translation for Enigma2, version 0.2.7.
 
 The receiver streams the selected audio track of a local recording to Gemini
 Live and displays translated subtitles. Source language is detected automatically.
@@ -26,11 +26,11 @@ After installation, package archives matching
 Use the generated package filename when uploading to `/tmp`. Other filenames
 and files outside `/tmp` are not removed.
 
-Open E2PVR from the plugin menu. Red starts or stops translation immediately, as in E2Dub. Starting saves
-preferences and returns to playback; stopping keeps the menu open;
+Open E2PVR from the plugin menu. Red starts translation and blue stops it. Starting saves
+preferences and returns to playback. Stopping keeps the menu open.
 green saves display preferences and closes the menu; Exit cancels unsaved display
 changes. Yellow tests the actual subtitle connection with a 60-second display
-deadline. Play a local recording with the image's player. Reopen E2PVR and press red
+deadline. Play a local recording with the image's player. Reopen E2PVR and press blue
 to stop. The status distinguishes a stopped session, waiting for a recording,
 connecting, active translation, and connection errors.
 Internet access and a working API key with quota are required. The default
@@ -40,7 +40,9 @@ service model is `gemini-3.5-live-translate-preview`.
 
 The menu supports English (default), Persian and Arabic. Subtitle color, installed
 font, three font sizes, vertical position as a percentage of picture height, and
-box transparency are configurable. Fonts are discovered in `/usr/share/fonts`.
+box transparency are configurable. The defaults are yellow, small, 100% vertical
+position and 65% box transparency. In Persian and Arabic, setting names are on
+the right and values are on the left. Fonts are discovered in `/usr/share/fonts`.
 Vazirmatn SemiBold is also supplied under the included SIL Open Font License.
 Each subtitle line has a separate non-wrapping label to preserve RTL line order.
 
@@ -79,8 +81,11 @@ with trusted CA certificates are required. AArch64, ARM and MIPS plugin packages
 share the same Python code; this does not certify every image or hardware model.
 Dreambox One with DreamOS 2.6 and Python 2.7 is the hardware test target.
 
-Diagnostic logs rotate in `/tmp/e2pvr.log`. They contain status and timings,
-not API keys or transcript contents. Temporary session control files are kept
+Read the current diagnostic log with `tail -n 100 /tmp/e2pvr.log`. Follow events
+as they happen with `tail -f /tmp/e2pvr.log`. Older entries rotate into
+`/tmp/e2pvr.log.1` and `/tmp/e2pvr.log.2`. The log records connection stages,
+service and decoder errors, cue timings and the reason translation stopped.
+It excludes API keys and transcript text. Temporary session control files are kept
 under a private `/tmp/e2pvr-*` directory and removed when the worker stops.
 Audio travels through pipes and is not written to disk. The client requests
 TEXT output; any inline audio still returned by the service is discarded.
@@ -123,9 +128,9 @@ Keep the universal packages for other receivers until their native builds have
 been tested on matching hardware.
 
 Translation starts only after pressing red during local playback. A saved enabled
-flag does not resume translation after an interface restart. The red label follows
-the active recording worker; failed or stopped workers show Start, which retries
-from the current playback position. UTF-8 recording names are passed explicitly
+flag does not resume translation after an interface restart. Red while translation is
+enabled and blue while it is stopped have no effect. To retry a failed session,
+press blue, then red. UTF-8 recording names are passed explicitly
 to the decoder on Python 2.7.
 
 Local media is not filtered by filename extension. Names in any UTF-8 script,
@@ -135,8 +140,10 @@ audio decoding still depend on the receiver player and FFmpeg codecs.
 ## Exit and restart
 
 No translation worker, decoder or network connection is started on image or
-interface startup. Start must be pressed explicitly. Graceful interface shutdown
-kills the worker process group without waiting for network requests. On Linux,
+interface startup. Start must be pressed explicitly. Standby and graceful interface
+shutdown stop translation, audio decoding, subtitle rendering and the connection
+test without waiting for the service or for subprocesses to exit. To resume
+translation after standby, press red. On Linux,
 parent-death signals also kill a worker if the interface crashes and a decoder if
 its worker disappears. No startup download, worker recovery or blocking network
 operation is required for boot.
