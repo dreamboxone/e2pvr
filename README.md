@@ -2,7 +2,7 @@
   <img alt="E2PVR" src="src/E2PVR/plugin.png" width="260">
 </h1>
 
-<p align="center" dir="rtl"><b>ترجمهٔ زیرنویس فیلم‌های ضبط‌شده در Enigma2</b></p>
+<p align="center" dir="rtl"><b>ترجمه زیرنویس فیلم‌های ضبط‌شده در Enigma2</b></p>
 
 <p align="center">
   <a href="https://github.com/dreamboxone/e2pvr/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/dreamboxone/e2pvr?style=for-the-badge&amp;color=0b3d91"></a>
@@ -24,9 +24,9 @@
 
 <h3 dir="rtl" align="right">نصب</h3>
 
-<p dir="rtl" align="right">بستهٔ مناسب را از صفحهٔ انتشارها دانلود کنید، با نام اصلی به پوشهٔ <code>/tmp</code> ریسیور منتقل کنید و با حساب <code>root</code> از طریق SSH وارد ریسیور شوید. هنگام اجرا، فقط یک فایل نصب E2PVR از نوع انتخاب‌شده در <code>/tmp</code> قرار دهید. <a href="https://github.com/dreamboxone/e2pvr/releases/latest">دانلود بسته‌ها</a></p>
+<p dir="rtl" align="right">بسته مناسب را از صفحه انتشارها دانلود کنید، با نام اصلی به پوشه <code>/tmp</code> ریسیور منتقل کنید و با حساب <code>root</code> از طریق SSH وارد ریسیور شوید. هنگام اجرا، فقط یک فایل نصب E2PVR از نوع انتخاب‌شده در <code>/tmp</code> قرار دهید. <a href="https://github.com/dreamboxone/e2pvr/releases/latest">دانلود بسته‌ها</a></p>
 
-<p dir="rtl" align="right"><strong>DreamOS با بستهٔ DEB</strong></p>
+<p dir="rtl" align="right"><strong>DreamOS با بسته DEB</strong></p>
 
 <div dir="ltr" align="left">
 
@@ -36,7 +36,7 @@ dpkg -i /tmp/enigma2-plugin-extensions-e2pvr_*.deb
 
 </div>
 
-<p dir="rtl" align="right"><strong>ایمیج‌های مبتنی بر opkg با بستهٔ IPK</strong></p>
+<p dir="rtl" align="right"><strong>ایمیج‌های مبتنی بر opkg با بسته IPK</strong></p>
 
 <div dir="ltr" align="left">
 
@@ -81,9 +81,9 @@ opkg remove enigma2-plugin-extensions-e2pvr
 
 <ol dir="rtl" align="right">
   <li dir="rtl" align="right">یک فیلم ضبط‌شده را از PVR پخش کنید و <strong>E2PVR</strong> را از منوی <strong>Plugins</strong> یا <strong>Extensions</strong> باز کنید.</li>
-  <li dir="rtl" align="right">زبان برنامه و زبان زیرنویس را جداگانه انتخاب کنید. با دکمهٔ <strong>زرد</strong> می‌توانید اتصال به سرویس ترجمه را آزمایش کنید.</li>
-  <li dir="rtl" align="right">دکمهٔ <strong>قرمز</strong> ترجمه را شروع می‌کند و تنظیمات را ذخیره می‌کند. اگر فیلمی در حال پخش نباشد، فهرست ضبط‌ها برای انتخاب فیلم باز می‌شود.</li>
-  <li dir="rtl" align="right">برای توقف، دوباره E2PVR را باز کنید و دکمهٔ <strong>آبی</strong> را بزنید. دکمهٔ <strong>سبز</strong> تنظیمات را ذخیره می‌کند و <strong>Exit</strong> از تغییرات ذخیره‌نشده صرف‌نظر می‌کند.</li>
+  <li dir="rtl" align="right">زبان برنامه و زبان زیرنویس را جداگانه انتخاب کنید. با دکمه <strong>زرد</strong> می‌توانید اتصال به سرویس ترجمه را آزمایش کنید.</li>
+  <li dir="rtl" align="right">دکمه <strong>قرمز</strong> ترجمه را شروع می‌کند و تنظیمات را ذخیره می‌کند. اگر فیلمی در حال پخش نباشد، فهرست ضبط‌ها برای انتخاب فیلم باز می‌شود.</li>
+  <li dir="rtl" align="right">برای توقف، دوباره E2PVR را باز کنید و دکمه <strong>آبی</strong> را بزنید. دکمه <strong>سبز</strong> تنظیمات را ذخیره می‌کند و <strong>Exit</strong> از تغییرات ذخیره‌نشده صرف‌نظر می‌کند.</li>
   <li dir="rtl" align="right">استندبای ترجمه را متوقف می‌کند. پس از بیدار شدن ریسیور، برای شروع دوباره <strong>قرمز</strong> را بزنید.</li>
 </ol>
 

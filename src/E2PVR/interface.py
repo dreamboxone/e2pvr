@@ -106,7 +106,7 @@ TRANSLATIONS = {
     "Start translation": ("شروع ترجمه", "بدء الترجمة"),
     "Stop translation": ("توقف ترجمه", "إيقاف الترجمة"),
     "Translation stopped": ("ترجمه متوقف است", "الترجمة متوقفة"),
-    "Ready - play a recorded movie": ("آماده؛ یک فیلم ضبط‌شده پخش کنید", "جاهز؛ شغّل فيلماً مسجلاً"),
+    "Ready - play a recorded movie": ("آماده؛ یک فیلم ضبط‌شده پخش کنید", "جاهز؛ شغل فيلما مسجلا"),
     "Press Start to select a recorded movie": ("برای انتخاب فیلم ضبط‌شده، شروع را بزنید", "اضغط بدء لاختيار فيلم مسجل"),
     "Connecting to subtitle service...": ("در حال اتصال به سرویس زیرنویس...", "جار الاتصال بخدمة الترجمة..."),
     "Translating recording": ("در حال ترجمه فیلم", "جار ترجمة التسجيل"),
