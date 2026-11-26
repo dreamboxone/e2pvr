@@ -3,6 +3,8 @@
 [![Total release downloads](https://img.shields.io/github/downloads/dreamboxone/e2pvr/total)](https://github.com/dreamboxone/e2pvr/releases)
 [Telegram @routekernel1](https://t.me/routekernel1) · [راهنمای فارسی](#فارسی) · [English](#english)
 
+<div dir="rtl" align="right">
+
 ## فارسی
 
 E2PVR صدای فیلم ضبط‌شده را از طریق Gemini Live ترجمه می‌کند و زیرنویس را روی تصویر نمایش می‌دهد. ریسیور به اینترنت، FFmpeg و کلید معتبر Gemini API نیاز دارد.
@@ -57,6 +59,8 @@ opkg remove enigma2-plugin-extensions-e2pvr
 ```sh
 tail -n 100 /tmp/e2pvr.log
 ```
+
+</div>
 
 ## English
 
