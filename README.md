@@ -24,18 +24,18 @@ E2PVR صدای فیلم ضبط‌شده را از طریق Gemini Live ترجم�
 
 ### نصب
 
-بستهٔ مناسب را از صفحهٔ انتشارها دانلود کنید، با نام اصلی به پوشهٔ `/tmp` ریسیور منتقل کنید و با حساب `root` از طریق SSH وارد ریسیور شوید. دستورهای زیر برای نسخهٔ ۰٫۲٫۷ هستند. [دانلود بسته‌ها](https://github.com/dreamboxone/e2pvr/releases/latest)
+بستهٔ مناسب را از صفحهٔ انتشارها دانلود کنید، با نام اصلی به پوشهٔ `/tmp` ریسیور منتقل کنید و با حساب `root` از طریق SSH وارد ریسیور شوید. هنگام اجرا، فقط یک فایل نصب E2PVR از نوع انتخاب‌شده در `/tmp` قرار دهید. [دانلود بسته‌ها](https://github.com/dreamboxone/e2pvr/releases/latest)
 
-**DreamOS با بستهٔ DEB عمومی**
+**DreamOS با بستهٔ DEB**
 
 ```sh
-dpkg -i /tmp/enigma2-plugin-extensions-e2pvr_0.2.7_all.deb
+dpkg -i /tmp/enigma2-plugin-extensions-e2pvr_*.deb
 ```
 
 **ایمیج‌های مبتنی بر opkg با بستهٔ IPK**
 
 ```sh
-opkg install /tmp/enigma2-plugin-extensions-e2pvr_0.2.7_all.ipk
+opkg install /tmp/enigma2-plugin-extensions-e2pvr_*.ipk
 ```
 
 پس از نصب، رابط Enigma2 دوباره راه‌اندازی می‌شود و فایل نصب از `/tmp` پاک می‌شود. کلید Gemini API را به‌تنهایی در یک خط در فایل مربوط به بسته قرار دهید.
