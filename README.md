@@ -79,8 +79,12 @@ opkg remove enigma2-plugin-extensions-e2pvr
 
 <h3 dir="rtl" align="right">استفاده</h3>
 
+<p dir="rtl" align="right">
+  <img src="docs/local-video-fa.svg" alt="پلاگین صدای فیلم‌هایی را که روی رسیور کپی می‌کنید هم ترجمه می‌کند. کافی است رسیور بتواند فیلم را پخش کند. ضبط فیلم با خود رسیور لازم نیست.">
+</p>
+
 <ol dir="rtl" align="right">
-  <li dir="rtl" align="right">یک فیلم ضبط‌شده را از PVR پخش کنید و <strong>E2PVR</strong> را از منوی <strong>Plugins</strong> یا <strong>Extensions</strong> باز کنید.</li>
+  <li dir="rtl" align="right">یک فیلم را از PVR پخش کنید و <strong>E2PVR</strong> را از منوی <strong>Plugins</strong> یا <strong>Extensions</strong> باز کنید.</li>
   <li dir="rtl" align="right">زبان برنامه و زبان زیرنویس را جداگانه انتخاب کنید. با دکمه <strong>زرد</strong> می‌توانید اتصال به سرویس ترجمه را آزمایش کنید.</li>
   <li dir="rtl" align="right">دکمه <strong>قرمز</strong> ترجمه را شروع می‌کند و تنظیمات را ذخیره می‌کند. اگر فیلمی در حال پخش نباشد، فهرست ضبط‌ها برای انتخاب فیلم باز می‌شود.</li>
   <li dir="rtl" align="right">برای توقف، دوباره E2PVR را باز کنید و دکمه <strong>آبی</strong> را بزنید. دکمه <strong>سبز</strong> تنظیمات را ذخیره می‌کند و <strong>Exit</strong> از تغییرات ذخیره‌نشده صرف‌نظر می‌کند.</li>

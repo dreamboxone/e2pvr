@@ -75,6 +75,8 @@ Restart the receiver after removing the plugin.
 
 ## Usage
 
+**E2PVR also translates audio from movies copied to the receiver, as long as the receiver can play the file. The receiver does not need to record the movie itself.**
+
 Open E2PVR from the plugin menu. Red starts translation and blue stops it. Starting saves
 preferences and returns to playback. Stopping keeps the menu open.
 green saves display preferences and closes the menu; Exit cancels unsaved display

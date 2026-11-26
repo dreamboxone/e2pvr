@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="94" viewBox="0 0 600 94" role="img" aria-labelledby="note">
+  <title id="note">پلاگین صدای فیلم‌هایی را که روی رسیور کپی می‌کنید هم ترجمه می‌کند. کافی است رسیور بتواند فیلم را پخش کند. ضبط فیلم با خود رسیور لازم نیست.</title>
+  <style>
+    text { fill: #c52130; }
+    @media (prefers-color-scheme: dark) { text { fill: #ff6572; } }
+  </style>
+  <text lang="fa" direction="rtl" text-anchor="start" font-family="Tahoma, Arial, sans-serif" font-size="21" font-weight="700">
+    <tspan x="596" y="24">صدای فیلم‌های کپی‌شده هم قابل ترجمه است.</tspan>
+    <tspan x="596" y="54">کافی است رسیور بتواند فیلم را پخش کند.</tspan>
+    <tspan x="596" y="84">ضبط فیلم با خود رسیور لازم نیست.</tspan>
+  </text>
+</svg>
