@@ -53,7 +53,7 @@ opkg install /tmp/enigma2-plugin-extensions-e2pvr_*.ipk
   <li dir="rtl" align="right">IPK: فایل <code>/home/root/apikey.txt</code></li>
 </ul>
 
-<h3 dir="rtl" align="right">حذف افزونه</h3>
+<h3 dir="rtl" align="right">حذف پلاگین</h3>
 
 <p dir="rtl" align="right"><strong>روی DreamOS</strong></p>
 
